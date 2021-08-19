@@ -4,6 +4,12 @@
 Fortran使用者がJuliaを始めるための情報が書かれたウェブサイトです。
 適宜更新していきたいと思います。
 
+ウェブサイトは
+
+https://cometscome.github.io/JuliaFromFortran/build
+
+からアクセスできます。
+
 
 ## このサイトについて
 このサイトはGitHub上に作られており、追記したいあるいは改訂したい場合は通常のgitのように更新リクエストができます。
