@@ -81,6 +81,9 @@ Cnoprint================================================================
 
 Juliaの場合、このコードを使わなくてもOptimというパッケージを使えば非線形関数の最小値を求めることができます。
 
+#### 追記
+このコードについて調べてみたところ、ついに元のコードの[情報](ftp://hsl.rl.ac.uk/pub/reports/AERE_R_7125.pdf)が書かれている文献（R.Fletcherの"FORTRAN SUBROUTINES FOR MINIMIZATION BY QUASI-NEWTON METHODS", Research group report(United Kingdom Atomic Energy Authority)）を見つけました。これによると、このコードva10aは1972年の4月に書かれたそうです！
+
 ### 5. Fortranと文法が似ている
 配列の添字が1始まりであるため、Fortranのコードを素朴に移植することが容易です。PythonやCは0始まりですから、それらよりも違和感は少ないと思います。
 FortranとJuliaがどのくらい文法が似ているかは後述します。
