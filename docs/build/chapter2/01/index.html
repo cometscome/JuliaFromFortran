@@ -163,4 +163,83 @@ function mandel_main()
         println(&quot;\t&quot;)
     end
 end
-mandel_main()</code></pre><p>となります。</p><p>一つ目のFortran90コードで気をつけたポイントの他には、</p><ol><li><code>MODULE</code>は<code>module</code>に。モジュールの名前はJuliaでは最初の一文字を大文字にする慣例があるのでそれにならった</li><li><code>USE m_mandel</code>は<code>using .M_mandel</code>に。関数の中ではなく、外に定義する</li><li>Fortranではモジュール内で宣言した変数や関数はデフォルトで<code>share</code>属性を持っており<code>use</code>ですぐに使えるが、Juliaの場合に同様にしたい場合には<code>export</code>をモジュール内で使っておく。使わない場合は<code>M_mandel.mandel(x+im*y)</code>とアクセスすることになる</li></ol><p>ということに気をつけました。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Friday 20 August 2021 16:24">Friday 20 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+mandel_main()</code></pre><p>となります。</p><p>一つ目のFortran90コードで気をつけたポイントの他には、</p><ol><li><code>MODULE</code>は<code>module</code>に。モジュールの名前はJuliaでは最初の一文字を大文字にする慣例があるのでそれにならった</li><li><code>USE m_mandel</code>は<code>using .M_mandel</code>に。関数の中ではなく、外に定義する</li><li>Fortranではモジュール内で宣言した変数や関数はデフォルトで<code>share</code>属性を持っており<code>use</code>ですぐに使えるが、Juliaの場合に同様にしたい場合には<code>export</code>をモジュール内で使っておく。使わない場合は<code>M_mandel.mandel(x+im*y)</code>とアクセスすることになる</li></ol><p>ということに気をつけました。</p><h3 id="Fortran2003"><a class="docs-heading-anchor" href="#Fortran2003">Fortran2003</a><a id="Fortran2003-1"></a><a class="docs-heading-anchor-permalink" href="#Fortran2003" title="Permalink"></a></h3><p>次は、同じ<a href="https://qiita.com/cure_honey/items/795bd0e048ffeadc3e63">記事</a>のFortran2003のコードをJuliaに移植してみます。Fortranのコードを引用すると</p><pre><code class="language-fortran hljs">program mandel
+    implicit none
+    integer, parameter :: maxiter = 90, nx = 61, ny = 31
+    real   , parameter :: x0 = -2.0, x1 = 2.0, y0 = -2.0, y1 = 2.0
+    character(len = 10), parameter :: text = &#39;|+o0O.@*#-&#39;  
+    integer :: ix, iy, iter, mandelbrot(nx, ny) = 0, m(nx)  
+    real, allocatable :: x(:), y(:)
+    complex :: c(nx, ny), z(nx, ny) = (0.0, 0.0)
+    x = [( (x1 - x0) / (nx - 1) * (ix - 1) + x0, ix = 1, nx )]
+    y = [( (y1 - y0) / (ny - 1) * (iy - 1) + y0, iy = 1, ny )]
+    forall (ix = 1:nx, iy = 1:ny) c(ix, iy) = cmplx(x(ix), y(iy))
+    do iter = 0, maxiter
+      where (abs(z) &lt;= 2.0) 
+        z = z * z + c
+        mandelbrot = mandelbrot + 1
+      end where  
+    end do
+
+    do iy = 1, ny
+      m = (mandelbrot(:, iy) + 8) / 10  + 1
+      write(*, &#39;(61a1)&#39;) (text(m(ix):m(ix)), ix = 1, nx)  
+    end do
+    stop
+end program mandel</code></pre><p>となります。このコードをコンパイルして実行すると、</p><pre><code class="nohighlight hljs">||||||||||||||||||||||||||||||+||||||||||||||||||||||||||||||
+||||||||||||||||||||+++++++++++++++++++++||||||||||||||||||||
+||||||||||||||||+++++++++++++++++++++++++++++||||||||||||||||
+||||||||||||+++++++++++++++++++++++++++++++++++++||||||||||||
+||||||||||+++++++++++++++++++++++++++++++++++++++++||||||||||
+||||||||+++++++++++++++++++++++++++++++++++++++++++++||||||||
+||||||+++++++++++++++++++++++++++++++++++++++++++++++++||||||
+|||||+++++++++++++++++++++++++++++++++++++++++++++++++++|||||
+||||++++++++++++++++++++++++o++++++++++++++++++++++++++++||||
+|||++++++++++++++++++++++++---o+++++++++++++++++++++++++++|||
+||+++++++++++++++++++00+ooo0-*o@*++++++++++++++++++++++++++||
+||++++++++++++++++++++-------------@+++++++++++++++++++++++||
+|+++++++++++++++++++o---------------++++++++++++++++++++++++|
+|+++++++++++o-O-0O+o----------------o+++++++++++++++++++++++|
+|++++++++o+o------------------------.+++++++++++++++++++++++|
+----------------------------------0++++++++++++++++++++++++++
+|++++++++o+o------------------------.+++++++++++++++++++++++|
+|+++++++++++o-O-0O+o----------------o+++++++++++++++++++++++|
+|+++++++++++++++++++o---------------++++++++++++++++++++++++|
+||++++++++++++++++++++-------------@+++++++++++++++++++++++||
+||+++++++++++++++++++00+ooo0-*o@@++++++++++++++++++++++++++||
+|||++++++++++++++++++++++++---o+++++++++++++++++++++++++++|||
+||||++++++++++++++++++++++++o++++++++++++++++++++++++++++||||
+|||||+++++++++++++++++++++++++++++++++++++++++++++++++++|||||
+||||||++++++++++++++++++++++++++++++++++++++++++++++++|||||||
+||||||||+++++++++++++++++++++++++++++++++++++++++++++||||||||
+||||||||||+++++++++++++++++++++++++++++++++++++++++||||||||||
+||||||||||||++++++++++++++++++++++++++++++++++++|||||||||||||
+||||||||||||||||+++++++++++++++++++++++++++++||||||||||||||||
+||||||||||||||||||||+++++++++++++++++++++||||||||||||||||||||
+||||||||||||||||||||||||||||||+||||||||||||||||||||||||||||||</code></pre><p>となります。</p><p>対応するJuliaのコードは</p><pre><code class="language-julia hljs">function mandel()
+    maxiter = 90;nx = 61; ny = 31
+    x0 = -2.0; x1 = 2.0; y0 = -2.0; y1 = 2.0
+
+    text = &quot;|+o0O.@*#-&quot;
+    z = zeros(ComplexF64,nx,ny)
+    mandelbrot = zeros(Int64,nx,ny)
+
+    x = [ (x1 - x0) / (nx - 1) * (ix - 1) + x0  for ix = 1:nx]
+    y = [ (y1 - y0) / (ny - 1) * (iy - 1) + y0  for iy = 1:ny]
+    c = [ x[ix]+im*y[iy] for ix=1:nx,iy=1:ny]
+    for iter=0:maxiter
+        for i=1:length(z)
+            if abs(z[i]) &lt;= 2
+                z[i] = z[i]*z[i]+c[i]
+                mandelbrot[i] += 1
+            end
+        end
+    end
+
+    for iy=1:ny
+        m = (mandelbrot[:, iy] .+ 8) .÷ 10  .+ 1
+        [print(text[m[ix]:m[ix]]) for ix=1:nx]
+        println(&quot;\t&quot;)
+    end
+end
+mandel()</code></pre><p>です。Fortranでのwhere構文（配列の各要素に条件式を当てはめてループする構文）のJulia対応が分かりませんでしたので、仕方がないので<code>for</code>ループを使いました。ただし、そのまま書いても芸がありませんので、2次元配列のzなどを1次元配列として取り出す方法を使ってみました。Juliaでは2次元配列をメモリ格納順に並べた1次元のインデックスを用いて値を操作することができます。</p><p>今回は</p><ol><li>for文のリスト内包表記<code>[ (x1 - x0) / (nx - 1) * (ix - 1) + x0  for ix = 1:nx]</code>の使用</li><li>Fortranの<code>forall</code>の代わりに二重forループのリスト内包表記の使用</li></ol><p>を行いました。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Friday 20 August 2021 18:25">Friday 20 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
