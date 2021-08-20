@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>FortranのコードをJuliaへ移植してみる · Fortranから始めるJulia</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fortranから始めるJulia</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Fortranから始めるJulia</a></li><li><a class="tocitem" href="../../chapter1/01/">FortranとJuliaの文法比較</a></li><li><a class="tocitem" href="../../chapter1/02/">線形代数計算</a></li><li class="is-active"><a class="tocitem" href>FortranのコードをJuliaへ移植してみる</a><ul class="internal"><li><a class="tocitem" href="#マンデルブロ集合"><span>マンデルブロ集合</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>FortranのコードをJuliaへ移植してみる</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>FortranのコードをJuliaへ移植してみる</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/cometscome/JuliaFromFortran/blob/master/docs/src/chapter2/01.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="FortranのコードをJuliaへ移植してみる"><a class="docs-heading-anchor" href="#FortranのコードをJuliaへ移植してみる">FortranのコードをJuliaへ移植してみる</a><a id="FortranのコードをJuliaへ移植してみる-1"></a><a class="docs-heading-anchor-permalink" href="#FortranのコードをJuliaへ移植してみる" title="Permalink"></a></h1><h2 id="マンデルブロ集合"><a class="docs-heading-anchor" href="#マンデルブロ集合">マンデルブロ集合</a><a id="マンデルブロ集合-1"></a><a class="docs-heading-anchor-permalink" href="#マンデルブロ集合" title="Permalink"></a></h2><p>こちらの<a href="https://qiita.com/cure_honey/items/795bd0e048ffeadc3e63">記事</a>にはさまざまなFortranのバージョンで書かれたマンデルブロ集合のコードが紹介されています。</p><h3 id="Fortran90からJulia"><a class="docs-heading-anchor" href="#Fortran90からJulia">Fortran90からJulia</a><a id="Fortran90からJulia-1"></a><a class="docs-heading-anchor-permalink" href="#Fortran90からJulia" title="Permalink"></a></h3><p>この記事の中のFortran90のコードを引用します。コードは</p><pre><code class="language-fortran hljs">PROGRAM mandel
+    IMPLICIT NONE
+    INTEGER, PARAMETER :: nx = 61, ny = 31, maxiter = 90
+    REAL   , PARAMETER :: x0 = -2.0, x1 = 2.0, y0 = -2.0, y1 = 2.0
+    INTEGER :: ix, iy, iter, mandelbrot(nx, ny)
+    REAL :: x, y
+    COMPLEX :: z, c
+    DO iy = 1, ny
+      y = y0 + (y1 - y0) * (iy - 1) / REAL(ny - 1) 
+      DO ix = 1, nx
+        x = x0 + (x1 - x0) * (ix - 1) / REAL(nx - 1)  
+        c = CMPLX(x, y)
+        z = (0.0, 0.0)
+        DO iter = 0, maxiter
+          z = z * z + c
+          IF (ABS(z) &gt; 2.0) EXIT
+        END DO    
+        mandelbrot(ix, iy) = iter
+      END DO    
+    END DO
+!
+    DO iy = 1, ny     
+      PRINT &#39;(61I1)&#39;, (mandelbrot(:, iy) + 9) / 10 
+    END DO          
+    STOP
+END PROGRAM mandel</code></pre><p>です。このコードをgfortranでコンパイルし、実行しますと、</p><pre><code class="nohighlight hljs">0000000000000000000000000000001000000000000000000000000000000
+0000000000000000000011111111111111111111100000000000000000000
+0000000000000000111111111111111111111111111110000000000000000
+0000000000001111111111111111111111111111111111111000000000000
+0000000000111111111111111111111111111111111111111110000000000
+0000000011111111111111111111111111111111111111111111100000000
+0000001111111111111111111111111111111111111111111111111000000
+0000011111111111111111111111111111111111111111111111111100000
+0000111111111111111111111111211111111111111111111111111110000
+000111111111111111111111111***2111111111111111111111111111000
+0011111111111111111113312223*72671111111111111111111111111100
+0011111111111111111111*************61111111111111111111111100
+011111111111111111112***************1111111111111111111111110
+0111111111112*4*3412****************2111111111111111111111110
+011111111212************************5111111111111111111111110
+**********************************311111111111111111111111111
+011111111212************************5111111111111111111111110
+0111111111112*4*3412****************2111111111111111111111110
+011111111111111111112***************1111111111111111111111110
+0011111111111111111111*************61111111111111111111111100
+0011111111111111111113312223*72661111111111111111111111111100
+000111111111111111111111111***2111111111111111111111111111000
+0000111111111111111111111111211111111111111111111111111110000
+0000011111111111111111111111111111111111111111111111111100000
+0000001111111111111111111111111111111111111111111111111000000
+0000000011111111111111111111111111111111111111111111100000000
+0000000000111111111111111111111111111111111111111110000000000
+0000000000001111111111111111111111111111111111111000000000000
+0000000000000000111111111111111111111111111110000000000000000
+0000000000000000000011111111111111111111100000000000000000000
+0000000000000000000000000000001000000000000000000000000000000</code></pre><p>という出力が得られます。この出力を再現するようなJuliaのコードを書いてみましょう。</p><p>作ったJuliaのコードは</p><pre><code class="language-julia hljs">function mandel()
+    nx = 61; ny = 31; maxiter = 90
+    x0 = -2.0; x1 = 2.0; y0 = -2.0; y1 = 2.0
+    mandelbrot = zeros(Int64,nx, ny)
+    mandelbrot .= maxiter
+    for iy=1:ny
+        y = y0 + (y1 - y0) * (iy - 1) / real(ny - 1) 
+        for ix=1:nx
+            x = x0 + (x1 - x0) * (ix - 1) / real(nx - 1)
+            c = x + im*y
+            z = 0im
+            for iter=0:maxiter
+                z = z * z + c
+                if abs(z) &gt; 2
+                    mandelbrot[ix,iy] = iter
+                    break
+                end
+            end
+            
+        end
+    end
+    for iy=1:ny
+        for ix=1:nx
+            if mandelbrot[ix,iy] == maxiter
+                print(&quot;*&quot;)
+            else
+                print((mandelbrot[ix,iy]+9) ÷ 10)
+            end
+        end
+        println(&quot;\t&quot;)
+    end
+end
+mandel()</code></pre><p>です。</p><p>ポイントは</p><ol><li><code>program mandel</code>を<code>function mandel()</code>に変更</li><li><code>;</code>を使い一行に複数の文を入れた</li><li>配列<code>mandelbrot</code>を<code>mandelbrot = zeros(Int64,nx, ny)</code>で定義</li><li>Fortranでループを抜けるexitは、対応するbreakに変更</li><li>Fortranは<code>do iter = 0, maxiter</code>のループの途中で抜けた場合<code>iter</code>には抜けた時の値が入っているが、Juliaでは<code>iter</code>のスコープがローカルなので外では未定義になっている。そのため、<code>mandelbrot[ix,iy] = iter</code>とした</li><li><code>iter</code>のループが最大まで到達した時に、Fortranでは<code>mandelbrot(ix, iy)</code>の中身はループの最後の値<code>maxiter</code>になるが、Juliaでは前述のように<code>iter</code>はローカルスコープの変数なので値が入らない。なので、最初に<code>mandelbrot .= maxiter</code>と初期化した</li></ol><p>などです。見比べるとはっきりとわかりますが、Fortran90のコードとJuliaのコードはよく似ています。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Friday 20 August 2021 16:07">Friday 20 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
