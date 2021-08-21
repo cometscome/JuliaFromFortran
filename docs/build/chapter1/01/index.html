@@ -28,4 +28,43 @@ for i=1:4
     j = parse(Int64,u[1])
     x = parse(Float64,u[2])
     println(&quot;$j $x&quot;)
-end</code></pre><p>で読み込めます。Juliaではこの<code>readline</code>を使うやり方の他にも読み込みの方法がありますが、ここでは使い勝手の良いこの方法のみを紹介することとします。</p><h2 id="配列へのアクセス"><a class="docs-heading-anchor" href="#配列へのアクセス">配列へのアクセス</a><a id="配列へのアクセス-1"></a><a class="docs-heading-anchor-permalink" href="#配列へのアクセス" title="Permalink"></a></h2><p>Fortranでは配列aのi,j成分にアクセスするには</p><pre><code class="language-fortran hljs">a(i,j)</code></pre><p>と書きますが、Juliaでは</p><pre><code class="language-julia hljs">a[i,j]</code></pre><p>と書きます。 配列のメモリへの格納順はFortranとJuliaでは同じになっており、行列で言うところの列の単位で格納されています（一番左の添字が一番内側）。</p><p>配列の一部分へのアクセスもよく似ており、Fortranでは</p><pre><code class="language-fortran hljs">a(1:4,1:5)</code></pre><p>となり、Juliaでは</p><pre><code class="language-julia hljs">a[1:4,1:5]</code></pre><p>となります。</p><h2 id="関数"><a class="docs-heading-anchor" href="#関数">関数</a><a id="関数-1"></a><a class="docs-heading-anchor-permalink" href="#関数" title="Permalink"></a></h2><p>Fortranでは返り値が一つある場合には<code>function</code>を、返り値がない場合には<code>subroutine</code>を使っていました。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Fortranから始めるJulia</a><a class="docs-footer-nextpage" href="../02/">線形代数計算 »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Saturday 21 August 2021 12:06">Saturday 21 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+end</code></pre><p>で読み込めます。Juliaではこの<code>readline</code>を使うやり方の他にも読み込みの方法がありますが、ここでは使い勝手の良いこの方法のみを紹介することとします。</p><h2 id="配列へのアクセス"><a class="docs-heading-anchor" href="#配列へのアクセス">配列へのアクセス</a><a id="配列へのアクセス-1"></a><a class="docs-heading-anchor-permalink" href="#配列へのアクセス" title="Permalink"></a></h2><p>Fortranでは配列aのi,j成分にアクセスするには</p><pre><code class="language-fortran hljs">a(i,j)</code></pre><p>と書きますが、Juliaでは</p><pre><code class="language-julia hljs">a[i,j]</code></pre><p>と書きます。 配列のメモリへの格納順はFortranとJuliaでは同じになっており、行列で言うところの列の単位で格納されています（一番左の添字が一番内側）。</p><p>配列の一部分へのアクセスもよく似ており、Fortranでは</p><pre><code class="language-fortran hljs">a(1:4,1:5)</code></pre><p>となり、Juliaでは</p><pre><code class="language-julia hljs">a[1:4,1:5]</code></pre><p>となります。</p><h2 id="関数"><a class="docs-heading-anchor" href="#関数">関数</a><a id="関数-1"></a><a class="docs-heading-anchor-permalink" href="#関数" title="Permalink"></a></h2><p>Fortranでは返り値が一つある場合には<code>function</code>を、返り値がない場合には<code>subroutine</code>を使っていました。Juliaでは両方とも<code>function</code>です。定義の仕方はいくつか方法があります。例えば、<span>$c=a+b$</span>という計算は</p><pre><code class="language-julia hljs">function test(a,b)
+    c = a+b
+    return c
+end
+
+function test(a,b)
+    c = a+b
+end
+
+test(a,b) = a+b</code></pre><p>が可能です。return文がない場合には、最後の行がreturnとして返されることになっています。返り値が複数の場合は</p><pre><code class="language-julia hljs">function test2(a,b)
+    c = a+b
+    d = a*b
+    return c,d
+end</code></pre><p>のように書きます。</p><p>Fortranにおいて、<code>function</code>を使った場合、左辺に右辺の値が代入する形になります(<code>c = test(a,b)</code>)。これはJuliaも同様です。しかし、配列を扱うときは右辺に値を生成するとコピーが発生してしまうので、これを避けるためにはFortranでは<code>subroutine</code>を使っていました。同様のことはJuliaでも可能です。例えば、Fortranで</p><pre><code class="language-fortran hljs">module m_test
+    contains
+    subroutine testsub(c,b)
+        implicit none
+        real(8),intent(out)::c(:)
+        real(8),intent(in)::b
+        c(1) = b
+    end subroutine
+end module
+program main
+    use m_test
+    implicit none
+    real(8)::val(1:4)
+
+    val = 0d0
+    call testsub(val,3d0)
+    write(*,*) val
+end program</code></pre><p>というコードを考えます。サブルーチン<code>testsub(c,b)</code>は引数の<code>c</code>の値を変更します。 これをJuliaで書きますと、</p><pre><code class="language-julia hljs">function testsub!(c,b)
+    c[1] = b
+end
+
+function main()
+    val = zeros(Float64,4)
+    testsub!(val,3)
+    println(val)
+end
+main()</code></pre><p>となります（ここではあえてモジュールを使いませんでした。モジュールについては後述します）。Juliaでは引数の値を変更するときは慣例的に関数名の最後に<code>!</code>をつけます。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Fortranから始めるJulia</a><a class="docs-footer-nextpage" href="../02/">線形代数計算 »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Saturday 21 August 2021 12:31">Saturday 21 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
