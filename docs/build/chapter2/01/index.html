@@ -242,4 +242,247 @@ end program mandel</code></pre><p>となります。このコードをコンパ�
         println(&quot;\t&quot;)
     end
 end
-mandel()</code></pre><p>です。Fortranでのwhere構文（配列の各要素に条件式を当てはめてループする構文）のJulia対応が分かりませんでしたので、仕方がないので<code>for</code>ループを使いました。ただし、そのまま書いても芸がありませんので、2次元配列のzなどを1次元配列として取り出す方法を使ってみました。Juliaでは2次元配列をメモリ格納順に並べた1次元のインデックスを用いて値を操作することができます。</p><p>今回は</p><ol><li>for文のリスト内包表記<code>[ (x1 - x0) / (nx - 1) * (ix - 1) + x0  for ix = 1:nx]</code>の使用</li><li>Fortranの<code>forall</code>の代わりに二重forループのリスト内包表記の使用</li></ol><p>を行いました。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Friday 20 August 2021 18:25">Friday 20 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+mandel()</code></pre><p>です。Fortranでのwhere構文（配列の各要素に条件式を当てはめてループする構文）のJulia対応が分かりませんでしたので、仕方がないので<code>for</code>ループを使いました。ただし、そのまま書いても芸がありませんので、2次元配列のzなどを1次元配列として取り出す方法を使ってみました。Juliaでは2次元配列をメモリ格納順に並べた1次元のインデックスを用いて値を操作することができます。</p><p>今回は</p><ol><li>for文のリスト内包表記<code>[ (x1 - x0) / (nx - 1) * (ix - 1) + x0  for ix = 1:nx]</code>の使用</li><li>Fortranの<code>forall</code>の代わりに二重forループのリスト内包表記の使用</li></ol><p>を行いました。</p><h3 id="Fortran2003-オブジェクト指向"><a class="docs-heading-anchor" href="#Fortran2003-オブジェクト指向">Fortran2003 オブジェクト指向</a><a id="Fortran2003-オブジェクト指向-1"></a><a class="docs-heading-anchor-permalink" href="#Fortran2003-オブジェクト指向" title="Permalink"></a></h3><p>次は、同じ記事のオブジェクト指向で書かれたFortranコードをJuliaに移植してみます。 コードは</p><pre><code class="language-fortran hljs">module m_bmp
+    implicit none
+    type :: t_bmp_file_header
+      sequence                      ! 14bytes
+      character(len = 2) :: bfType = &#39;BM&#39; !integer(2) :: bfType = transfer(&#39;BM&#39;, 0_2, 1) ! BitMap
+      integer(4) :: bfSize          ! file size in bytes
+      integer(2) :: bfReserved1 = 0 ! always 0
+      integer(2) :: bfReserved2 = 0 ! always 0
+      integer(4) :: bfOffBits
+    end type t_bmp_file_header
+    ! 
+    type :: t_bmp_info_header 
+      sequence
+      integer(4) :: biSize     = Z&#39;28&#39; ! size of bmp_info_header ; 40bytes 
+      integer(4) :: biWidth
+      integer(4) :: biHeight
+      integer(2) :: biPlanes   = 1 ! always 1
+      integer(2) :: biBitCount
+      integer(4) :: biCompression = 0 !0:nocompression,1:8bitRLE,2:4bitRLE,3:bitfield
+      integer(4) :: biSizeImage
+      integer(4) :: biXPelsPerMeter = 3780 ! 96dpi
+      integer(4) :: biYPelsPerMeter = 3780 ! 96dpi 
+      integer(4) :: biClrUsed      = 0
+      integer(4) :: biClrImportant = 0 
+    end type t_bmp_info_header  
+    !
+    type :: t_rgb
+      sequence
+      character :: b, g, r  ! order is b g r 
+    end type t_rgb 
+    !
+    type :: t_bmp(nx, ny)
+      integer, len:: nx, ny  
+      type(t_rgb) :: rgb(nx, ny)
+    contains 
+      procedure :: wr =&gt; wr_bmp
+      procedure :: pr_bmp
+      generic :: write(formatted) =&gt; pr_bmp
+    end type
+  contains   
+    subroutine wr_bmp(bmp, fn)
+      class(t_bmp(*, *)), intent(in) :: bmp
+      character(len = *), intent(in) :: fn
+      type(t_bmp_file_header) :: bmp_file_header
+      type(t_bmp_info_header) :: bmp_info_header
+      bmp_file_header%bfSize      = 14 + bmp_info_header%biSize + 0 + bmp%nx * bmp%ny * 3
+      bmp_file_header%bfOffBits   = 14 + bmp_info_header%biSize
+      bmp_info_header%biWidth     = bmp%nx       ! nx shouold be a multiple of 4
+      bmp_info_header%biHeight    = bmp%ny
+      bmp_info_header%biBitCount  = 24           ! color depth 24bits
+      bmp_info_header%biSizeImage = bmp%nx * bmp%ny * 3
+      open(9, file = fn//&#39;.bmp&#39;, form = &#39;binary&#39;, status = &#39;unknown&#39;)
+      write(9) bmp_file_header
+      write(9) bmp_info_header
+      write(9) bmp%rgb
+      close(9)
+      return
+    end subroutine wr_bmp
+! convert to t_RGB    
+    pure elemental type(t_rgb) function to_rgb(ir, ig, ib)
+      integer, intent(in) :: ir, ig, ib
+      to_rgb = t_rgb(achar(ib), achar(ig), achar(ir))
+    end function to_rgb  
+
+    subroutine pr_bmp(dtv, unit, iotype, vlist, io, iomsg)
+      class(t_bmp(*, *)), intent(in) :: dtv
+      integer, intent(in) :: unit
+      character(len = *), intent(in) :: iotype
+      integer, intent(in) :: vlist(:)
+      integer, intent(out) :: io
+      character(len = *), intent(in out) :: iomsg
+      character(len = 30) :: fmt
+      if (iotype == &#39;LISTDIRECTED&#39;) then
+        write(unit, *, iostat = io) &#39;nx =&#39;, dtv%nx, &#39;, ny =&#39;, dtv%ny
+      end if    
+    end subroutine pr_bmp
+  end module m_bmp
+
+  module m_mandel
+    implicit none
+    integer, parameter :: maxiter = 254
+  contains
+    pure elemental integer function mandel(c)
+      complex, intent(in) :: c
+      complex :: z
+      z = (0.0, 0.0)
+      do mandel = 0, maxiter
+        z = z * z + c
+        if (abs(z) &gt; 2.0) exit
+      end do    
+    end function mandel 
+  end module m_mandel
+
+  program mandel_main
+    use m_bmp
+    use m_mandel 
+    implicit none
+    integer, parameter :: nx = 640, ny = 640
+    real   , parameter :: x0 = -2.0, x1 = 2.0, y0 = -2.0, y1 = 2.0
+    integer :: ix, iy, iter, mandelbrot(nx, ny)
+    real    :: x(nx), y(ny)
+    complex :: c(nx, ny)
+    type(t_bmp(nx, ny)) :: bmp 
+!
+    forall (ix = 1:nx) x(ix) = x0 + (x1 - x0) * (ix - 1) / real(nx - 1)
+    forall (iy = 1:ny) y(iy) = y0 + (y1 - y0) * (iy - 1) / real(ny - 1)
+    forall (ix = 1:nx, iy = 1:ny) c(ix, iy) = cmplx(x(ix), y(iy))
+    mandelbrot = mandel(c)  
+!
+    bmp%rgb = to_rgb(255 - mandelbrot, 255 - mandelbrot, 255 - mandelbrot)
+    call bmp%wr(&#39;test&#39;)
+    print *, &#39;BMP size: &#39;, bmp
+    stop 
+  end program mandel_main</code></pre><p>です。このコードですが、gfortranでコンパイルしようとしても失敗してしまいました。<a href="https://fortran-lang.discourse.group/t/a-gfortran-issue-with-parameterized-derived-types/213">こちら</a>によると、どうやら「Fortran2003 で導入されたパラメータ付派生型(parameterized derived type)」がgfortranがこの機能にフルに対応していないようです。ですので、このコードの実行を確認できていません。記事によると、このコードは画像をBMP形式で出力してくれるようです。BMPのフォーマットは検索すると出てきましたので、その形式に従ってバイナリを出力する、というコードのようです。</p><p>これのJulia版は</p><pre><code class="language-julia hljs">module M_bmp
+    export to_rgb,T_bmp,wr_bmp
+
+    Base.@kwdef mutable struct T_bmp_file_header
+        bfType::String = &quot;BM&quot; 
+        bfSize::Int32 = 0
+        bfReserved1::Int16 = 0
+        bfReserved2::Int16 = 0
+        bfOffBits::Int32 = 0
+    end
+
+    Base.@kwdef mutable struct T_bmp_info_header 
+        biSize::Int32 = 0x28
+        biWidth::Int32 = 0
+        biHeight::Int32 = 0
+        biPlanes::Int16   = 1 
+        biBitCount::Int16 = 0
+        biCompression::Int32 = 0 #0:nocompression,1:8bitRLE,2:4bitRLE,3:bitfield
+        biSizeImage::Int32 = 0
+        biXPelsPerMeter::Int32 = 3780 # 96dpi
+        biYPelsPerMeter::Int32 = 3780 # 96dpi 
+        biClrUsed::Int32      = 0
+        biClrImportant::Int32 = 0 
+
+    end
+
+    mutable struct T_rgb
+        b::UInt8
+        g::UInt8
+        r::UInt8
+    end
+
+    Base.@kwdef mutable struct T_bmp{nx,ny}
+        rgb::Array{T_rgb,2} = Array{T_rgb,2}(undef,nx,ny)
+    end
+
+    function Base.write(fp::IO,data::T_bmp_file_header)
+        write(fp,data.bfType)
+        write(fp,data.bfSize)
+        write(fp,data.bfReserved1)
+        write(fp,data.bfReserved2)
+        write(fp,data.bfOffBits)
+    end
+
+    function Base.write(fp::IO,data::T_bmp_info_header)
+        write(fp,data.biSize)
+        write(fp,data.biWidth)
+        write(fp,data.biHeight)
+        write(fp,data.biPlanes)
+        write(fp,data.biBitCount)
+        write(fp,data.biCompression)
+        write(fp,data.biSizeImage)
+        write(fp,data.biXPelsPerMeter)
+        write(fp,data.biYPelsPerMeter)
+        write(fp,data.biClrUsed)
+        write(fp,data.biClrImportant)
+    end
+
+    function Base.write(fp::IO,data::T_rgb)
+        write(fp,data.b)
+        write(fp,data.g)
+        write(fp,data.r)
+    end
+
+    function Base.write(fp::IO,data::T_bmp{nx,ny}) where {nx,ny}
+        for iy=1:ny
+            for ix=1:nx
+                #println(data.rgb[ix,iy])
+                write(fp,data.rgb[ix,iy])
+            end
+        end
+    end
+
+    function wr_bmp(bmp::T_bmp{nx,ny}, fn) where {nx,ny}
+        bmp_info_header = T_bmp_info_header()
+        bmp_file_header = T_bmp_file_header()
+        bmp_file_header.bfSize      = 14 + bmp_info_header.biSize + 0 + nx * ny * 3
+        bmp_file_header.bfOffBits   = 14 + bmp_info_header.biSize
+        bmp_info_header.biWidth     = nx       # nx shouold be a multiple of 4
+        bmp_info_header.biHeight    = ny
+        bmp_info_header.biBitCount  = 24           # color depth 24bits
+        bmp_info_header.biSizeImage = nx * ny * 3
+        fp = open(fn*&quot;.bmp&quot;,&quot;w&quot;)
+        write(fp,bmp_file_header)
+        write(fp,bmp_info_header)
+        write(fp,bmp)
+    end
+
+    function to_rgb(ir,ig,ib)
+        return T_rgb(htol(ir),htol(ig),htol(ib))
+    end
+end
+
+module M_mandel
+    const maxiter = 254
+    export mandel,maxiter
+
+    function mandel(c)
+        z = 0im
+        count = maxiter
+        for i=0:maxiter
+            z = z * z + c
+            if abs(z) &gt; 2
+                count = i
+                break
+            end
+        end
+        return count
+    end
+end
+
+
+using .M_bmp
+using .M_mandel
+
+function mandel_main()
+    nx = 640;ny = 640
+    x0 = -2.0;x1 = 2.0; y0 = -2.0; y1 = 2.0
+    bmp = T_bmp{nx,ny}()
+
+    x = [ (x1 - x0) / (nx - 1) * (ix - 1) + x0  for ix = 1:nx]
+    y = [ (y1 - y0) / (ny - 1) * (iy - 1) + y0  for iy = 1:ny]
+    c = [ x[ix]+im*y[iy] for ix=1:nx,iy=1:ny]
+    mandelbrot = mandel.(c)
+
+    bmp.rgb = to_rgb.(255 .- mandelbrot,255 .- mandelbrot,255 .- mandelbrot)
+    wr_bmp(bmp,&quot;test&quot;)
+    println(&quot;BMP size:  $nx $ny&quot;)
+end
+
+mandel_main()</code></pre><p>となります。 実行した結果は得られる画像は</p><p><img src="../test.bmp" alt="fig1"/></p><p>ポイントは</p><ol><li>Fortran2003のオブジェクト指向によるクラスはJuliaでは<code>mutable struct</code>に。また、クラスのメソッドはJuliaでは多重ディスパッチで定義。</li><li>Fortranでは定義した構造体をそのままバイナリで書き出せたが、Juliaでの独自型は自分で書き出しを指定してやる必要があるため、標準のwriteを多重ディスパッチで機能拡張</li><li>BMP形式の定義によると<code>t_rgb</code>クラスに入れるべきは符号なし整数なので、Juliaでは<code>UInt8</code>型（符号なし8ビット整数）に変更</li></ol><p>です。オブジェクト指向なコードもすんなりJuliaに移植できました。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Saturday 21 August 2021 10:02">Saturday 21 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
