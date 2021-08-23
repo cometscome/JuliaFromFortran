@@ -97,6 +97,9 @@ Juliaの場合、このコードを使わなくてもOptimというパッケー�
 FortranとJuliaがどのくらい文法が似ているかは後述します。
 
 
+## 動作確認に使用したJuliaのバージョン
+Julia 1.6.1
+
 ## このウェブサイトの作成者
 Yuki Nagai, Ph.D
 
