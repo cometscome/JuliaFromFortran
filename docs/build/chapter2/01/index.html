@@ -1106,4 +1106,28 @@ current step: 800000,/total step: 1000000
 current step: 900000,/total step: 1000000
 Time step: 6.37173748902287e-5
 Average error of energy update: 1.0575727271732502e-21
-  0.700156 seconds (4.88 M allocations: 509.987 MiB, 12.72% gc time, 30.04% compilation time)</code></pre><p>となり、計算速度がFortranとほぼ同じオーダーとなります。ただし、まだメモリーアロケーションが多いので、改善する余地はあると思います。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><a class="docs-footer-nextpage" href="../02/">FortranでできることをJuliaでやってみる »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Wednesday 25 August 2021 12:33">Wednesday 25 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+  0.700156 seconds (4.88 M allocations: 509.987 MiB, 12.72% gc time, 30.04% compilation time)</code></pre><p>となり、計算速度がFortranとほぼ同じオーダーとなります。さらに、今は<code>@time</code>で測定していますが、1回目はコードの最適化の時間が含まれてしまいます。ですので</p><pre><code class="language-julia hljs">@time celestial()
+@time celestial()</code></pre><p>と二回実行してみますと、</p><pre><code class="nohighlight hljs">current step: 100000,/total step: 1000000
+current step: 200000,/total step: 1000000
+current step: 300000,/total step: 1000000
+current step: 400000,/total step: 1000000
+current step: 500000,/total step: 1000000
+current step: 600000,/total step: 1000000
+current step: 700000,/total step: 1000000
+current step: 800000,/total step: 1000000
+current step: 900000,/total step: 1000000
+Time step: 6.37173748902287e-5
+Average error of energy update: 1.0575727271732502e-21
+  0.678261 seconds (4.88 M allocations: 509.987 MiB, 13.11% gc time, 30.31% compilation time)
+current step: 100000,/total step: 1000000
+current step: 200000,/total step: 1000000
+current step: 300000,/total step: 1000000
+current step: 400000,/total step: 1000000
+current step: 500000,/total step: 1000000
+current step: 600000,/total step: 1000000
+current step: 700000,/total step: 1000000
+current step: 800000,/total step: 1000000
+current step: 900000,/total step: 1000000
+Time step: 6.37173748902287e-5
+Average error of energy update: 1.0575727271732502e-21
+  0.365792 seconds (4.42 M allocations: 486.000 MiB, 2.28% gc time)</code></pre><p>となり、二回目はFortranとほぼ同じスピードとなっていることがわかります。</p><h3 id="Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版"><a class="docs-heading-anchor" href="#Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版">Velocity Verlet法によるN体問題: Juliaっぽい書き方版</a><a id="Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版" title="Permalink"></a></h3><p>上で述べたコードはFortranコードを移植したものですから、すごく「Fortranっぽい」コードになっています。これを「Juliaっぽい」ものに書き換えてみようと思います。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><a class="docs-footer-nextpage" href="../02/">FortranでできることをJuliaでやってみる »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Wednesday 25 August 2021 12:45">Wednesday 25 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
