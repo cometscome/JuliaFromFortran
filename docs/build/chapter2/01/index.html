@@ -1130,4 +1130,305 @@ current step: 800000,/total step: 1000000
 current step: 900000,/total step: 1000000
 Time step: 6.37173748902287e-5
 Average error of energy update: 1.0575727271732502e-21
-  0.365792 seconds (4.42 M allocations: 486.000 MiB, 2.28% gc time)</code></pre><p>となり、二回目はFortranとほぼ同じスピードとなっていることがわかります。</p><h3 id="Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版"><a class="docs-heading-anchor" href="#Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版">Velocity Verlet法によるN体問題: Juliaっぽい書き方版</a><a id="Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版" title="Permalink"></a></h3><p>上で述べたコードはFortranコードを移植したものですから、すごく「Fortranっぽい」コードになっています。これを「Juliaっぽい」ものに書き換えてみようと思います。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><a class="docs-footer-nextpage" href="../02/">FortranでできることをJuliaでやってみる »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Wednesday 25 August 2021 12:45">Wednesday 25 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+  0.365792 seconds (4.42 M allocations: 486.000 MiB, 2.28% gc time)</code></pre><p>となり、二回目はFortranとほぼ同じスピードとなっていることがわかります。</p><h3 id="Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版"><a class="docs-heading-anchor" href="#Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版">Velocity Verlet法によるN体問題: Juliaっぽい書き方版</a><a id="Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版" title="Permalink"></a></h3><p>上で述べたコードはFortranコードを移植したものですから、すごく「Fortranっぽい」コードになっています。これを「Juliaっぽい」ものに書き換えてみようと思います。</p><p>まず、天体の情報を格納するstructを作りましょう。</p><pre><code class="language-julia hljs">    struct Body
+        r::Array{Float64,1}
+        v::Array{Float64,1}
+        mass::Float64
+        f::Array{Float64,1}
+    end</code></pre><p>位置、速度、質量、そして力を格納します。 次に、天体たちの情報を格納するstructを作ります。</p><pre><code class="language-julia hljs">    mutable struct Many_bodies
+        bodies::Array{Body,1}
+        ndim::Int64
+        nbody::Int64
+        rij_temp::Array{Float64,1}
+        fij_temp::Array{Float64,1}
+
+        function Many_bodies(ndim,nbody,mass)
+            bodies = Array{Body,1}(undef,nbody)
+            r = zeros(Float64,ndim)
+            for i=1:nbody
+                r = zero(r)
+                v = zero(r)
+                f = zero(r)
+                bodies[i] = Body(r,v,mass[i],f)
+            end
+            rij_temp = zero(r)
+            fij_temp = zero(r)
+            return new(bodies,ndim,nbody,rij_temp,fij_temp)
+        end
+    end</code></pre><p>ここで、<code>bodies::Array{Body,1}</code>は、上で定義した<code>Body</code>型を要素に持つ配列です。<code>Many_bodies(ndim,nbody,mass)</code>はコンストラクタで、中身を初期化しています。つまり、引数が三つの関数<code>Many_bodies(ndim,nbody,mass)</code>を呼ぶことで、中身を指定しています。</p><p>次に、<code>Many_bodies</code>型からそれぞれの天体の情報を取り出すために</p><pre><code class="language-julia hljs">    function Base.getindex(manybodies::Many_bodies,i)
+        return manybodies.bodies[i]
+    end</code></pre><p>を定義します。これは、<code>manybodies[i]</code>と<code>manybodies</code>を配列のように考えてその要素<code>i</code>を呼び出そうとするとどういう挙動をするのか、ということを決めています。引数が<code>manybodies::Many_bodies</code>となっているのは、引数が<code>Many_bodies</code>型の時のみこの関数を呼ぶ、ということを指定しています。このように型ごとに関数を定義することで、オブジェクト指向プログラミングのような自由度を得ることができています。</p><p>さて、上のようなパーツを組み合わせてコードを作ります。その結果、</p><pre><code class="language-julia hljs">module Nbodys
+    export G,Many_bodies,Body
+    const G = 6.67384e-11
+
+    struct Body
+        r::Array{Float64,1}
+        v::Array{Float64,1}
+        mass::Float64
+        f::Array{Float64,1}
+    end
+
+    mutable struct Many_bodies
+        bodies::Array{Body,1}
+        ndim::Int64
+        nbody::Int64
+        rij_temp::Array{Float64,1}
+        fij_temp::Array{Float64,1}
+
+        function Many_bodies(ndim,nbody,mass)
+            bodies = Array{Body,1}(undef,nbody)
+            r = zeros(Float64,ndim)
+            for i=1:nbody
+                r = zero(r)
+                v = zero(r)
+                f = zero(r)
+                bodies[i] = Body(r,v,mass[i],f)
+            end
+            rij_temp = zero(r)
+            fij_temp = zero(r)
+            return new(bodies,ndim,nbody,rij_temp,fij_temp)
+        end
+    end
+
+    function Base.getindex(manybodies::Many_bodies,i)
+        return manybodies.bodies[i]
+    end
+end
+
+module Celestial_problem
+    using ..Nbodys
+    export cal_kin,cal_pot,cal_force!,update!
+
+    function cal_kin(manybodies::Many_bodies) 
+        e = 0.0
+        for i=1:manybodies.nbody
+            v2 = 0.0
+            for j=1:manybodies.ndim
+                v2 += manybodies[i].v[j]^2
+            end 
+            e += 0.5*manybodies[i].mass*v2
+        end
+        return e
+    end
+
+    function cal_pot(manybodies::Many_bodies)
+        ndim = manybodies.ndim
+        nbody = manybodies.nbody
+        e = 0.0
+        rij = manybodies.rij_temp
+        rij .= 0
+
+        for i=1:nbody-1
+            for j=i+1:nbody
+                for k=1:ndim
+                    rij[k] = manybodies[j].r[k]-manybodies[i].r[k]
+                end
+                rij2 = 0.0
+                for k=1:ndim
+                    rij2 += rij[k]^2
+                end 
+                rij_abs = sqrt(rij2)
+                e +=  manybodies[i].mass*manybodies[j].mass/rij_abs
+            end 
+        end 
+        return e
+    end
+
+    function cal_force!(manybodies::Many_bodies) 
+        ndim = manybodies.ndim
+        nbody = manybodies.nbody
+
+        rij = manybodies.rij_temp
+        rij .= 0
+        fij = manybodies.fij_temp
+        fij .= 0
+
+        for i=1:nbody
+            manybodies[i].f .= 0
+        end
+
+        for i = 1:nbody-1
+
+            for j = i+1:nbody
+                for k=1:ndim
+                    rij[k] = manybodies[j].r[k]-manybodies[i].r[k]
+                end
+                rij2 = 0.0
+                for k=1:ndim
+                    rij2 +=  rij[k]^2
+                end 
+                rij_abs = sqrt(rij2)
+                inv_rij_abs = 1.0/rij_abs
+                ftmp = manybodies[i].mass*manybodies[j].mass*(inv_rij_abs^3)
+                @. fij = ftmp*rij
+                for k=1:ndim
+                    manybodies[i].f[k] = manybodies[i].f[k] + fij[k]
+                    manybodies[j].f[k] = manybodies[j].f[k] - fij[k]
+                end
+            end 
+        end 
+
+        
+    end
+
+    function update!(manybodies::Many_bodies,dt,dt2)
+        nbody = manybodies.nbody
+        for k=1:nbody
+            @. manybodies[k].v += dt2*manybodies[k].f/manybodies[k].mass
+            @. manybodies[k].r += dt*manybodies[k].v
+        end
+        #exit()
+
+        cal_force!(manybodies)
+        
+        for k=1:nbody
+            @. manybodies[k].v += dt2*manybodies[k].f/manybodies[k].mass
+        end
+    end
+
+
+end
+
+using .Celestial_problem
+using .Nbodys
+
+
+function celestial()
+    n=10^6
+    noutmax=10000
+    nlive=10
+
+    mass = zeros(Float64,5)
+    mass[1] = 1.989e30          # mass of sun[kg]
+    mass[2] = 5.972e24          # mass of earth[kg]
+    mass[3] = 4.869e24          # venus
+    mass[4] = 6.419e23          # mars
+    mass[5] = 7.348e22          # mass of moon[kg]]
+    mnor = mass[1]
+    @. mass = mass/mnor
+
+
+    ndim  = 2
+    nbody = 5
+
+    manybodies = Many_bodies(ndim,nbody,mass)
+
+
+    manybodies[2].r[1] = 1.496e11       #!average radius of revolution of earth[m]
+    manybodies[3].r[1] = 1.082e11
+    manybodies[4].r[1] = 2.279e11
+    manybodies[5].r[1] = 3.844e8        #!average radius of revolution of moon[m]
+    manybodies[5].r[1] += manybodies[2].r[1]
+
+    manybodies[2].v[2] = 2.978e4        #!average velocity of earth[m/s]
+    manybodies[3].v[2] = 3.502e4
+    manybodies[4].v[2] = 2.413e4
+    manybodies[5].v[2] = 1.022e3        #!average velocity of moon[m/s]
+    manybodies[5].v[2] += manybodies[2].v[2]
+
+    #!----- time
+    t = 0.0
+    tmax = 3.2e8              #!365day*24hour*60min*60sec = 31536000sec = 3.2d7
+
+    #!----- normalizse
+    cnor = sqrt((manybodies[2].r[1]-manybodies[1].r[1])^2 +
+                (manybodies[2].r[2]-manybodies[1].r[2])^2)
+    tnor = sqrt(cnor^3/(G*mnor))
+    vnor = cnor/tnor
+
+    for i=1:nbody
+        @. manybodies[i].r = manybodies[i].r/cnor
+        @. manybodies[i].v = manybodies[i].v/vnor
+        
+    end
+    t = t/tnor
+    tmax = tmax/tnor
+
+    dt = (tmax-t)/n
+    dt2 = 0.5*dt
+
+    sum_dE  = 0.0
+    E0 = 0.0
+    Eold = 0.0
+
+    fp = open(&quot;outputNvV_julia_new.dat&quot;,&quot;w&quot;)
+    println(fp,&quot;t_NvV, E_NvV, dE_NvV, x1_NvV, y1_NvV, x2_NvV, y2_NvV, 
+      x3_NvV, y3_NvV, x4_NvV, y4_NvV, x5_NvV, y5_NvV&quot;)
+
+    nliveout = n ÷  nlive
+    if n &gt; noutmax
+        dout = n ÷ noutmax
+    else
+        dout = 1
+    end
+
+    for i = 1:n-1
+
+        if i % nliveout == 0
+            println(&quot;current step: $i,/total step: $n&quot;)
+        end
+    
+        if i == 1
+            Ev = cal_kin(manybodies)
+            Ep = cal_pot(manybodies)
+            E0 = Ev-Ep
+            Eold = E0   
+        end
+
+        Ev = cal_kin(manybodies)
+        Ep = cal_pot(manybodies)
+        #exit()
+        E = Ev-Ep
+        dE = abs((E - E0)/E0)
+        sum_dE += abs(E-Eold)
+
+        if (i-1) % dout == 0
+            print(fp,t,&quot;\t&quot;,&#39;,&#39;,E,&quot;\t&quot;,&#39;,&#39;,dE,&quot;\t&quot;,&#39;,&#39;)
+            for k=1:nbody
+                print(fp,manybodies[k].r[1],&quot;\t&quot;,&#39;,&#39;,manybodies[k].r[2],&quot;\t&quot;,&#39;,&#39;)
+            end
+            println(fp,&quot;\t&quot;)
+        end
+
+        if i == 1
+            cal_force!(manybodies)
+        end
+
+        update!(manybodies,dt,dt2)
+
+        t = t + dt
+        Eold = E
+    end
+    
+    close(fp)
+
+    println(&quot;Time step: &quot;,dt)
+    println(&quot;Average error of energy update: &quot;,sum_dE/n)
+
+end
+
+@time celestial()
+@time celestial()
+</code></pre><p>となりました。そして、実行すると、</p><pre><code class="nohighlight hljs">current step: 100000,/total step: 1000000
+current step: 200000,/total step: 1000000
+current step: 300000,/total step: 1000000
+current step: 400000,/total step: 1000000
+current step: 500000,/total step: 1000000
+current step: 600000,/total step: 1000000
+current step: 700000,/total step: 1000000
+current step: 800000,/total step: 1000000
+current step: 900000,/total step: 1000000
+Time step: 6.37173748902287e-5
+Average error of energy update: 1.0582096959495853e-21
+  0.591258 seconds (848.32 k allocations: 79.538 MiB, 2.08% gc time, 35.40% compilation time)
+current step: 100000,/total step: 1000000
+current step: 200000,/total step: 1000000
+current step: 300000,/total step: 1000000
+current step: 400000,/total step: 1000000
+current step: 500000,/total step: 1000000
+current step: 600000,/total step: 1000000
+current step: 700000,/total step: 1000000
+current step: 800000,/total step: 1000000
+current step: 900000,/total step: 1000000
+Time step: 6.37173748902287e-5
+Average error of energy update: 1.0582096959495853e-21</code></pre><p>となり、以前のコードより若干良いパフォーマンスを持つコードとなりました。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><a class="docs-footer-nextpage" href="../02/">FortranでできることをJuliaでやってみる »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Wednesday 25 August 2021 17:18">Wednesday 25 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
