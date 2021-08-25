@@ -520,7 +520,7 @@ function mandel_main()
 
     println(&quot;BMP size:  $nx $ny&quot;)
 end
-mandel_main()</code></pre><p>とすれば、BMP形式とPNG形式のグレースケールの画像を出力できます。</p><p>ここでの追加のポイントとしては</p><ol><li>グレースケール画像は0から1の範囲なので、255で割っている。</li><li>行列を可視化するような形に出力されるため、デフォルトではxが下方向、yが右方向になっている。これを変更するために、<code>img</code>を<code>&#39;</code>で転置した。</li></ol><p>です。Fortranと異なりJuliaはモダンな言語ですから、画像や動画の扱いが容易です。</p><h2 id="万有引力に従う天体の運動"><a class="docs-heading-anchor" href="#万有引力に従う天体の運動">万有引力に従う天体の運動</a><a id="万有引力に従う天体の運動-1"></a><a class="docs-heading-anchor-permalink" href="#万有引力に従う天体の運動" title="Permalink"></a></h2><p>こちらの<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/memo.html">サイト</a>では、万有引力に従う粒子の運動の解説とFortranコードの説明があります。ここにあるFortranコードをJuliaに移植してみることにします。</p><h3 id="基本方程式"><a class="docs-heading-anchor" href="#基本方程式">基本方程式</a><a id="基本方程式-1"></a><a class="docs-heading-anchor-permalink" href="#基本方程式" title="Permalink"></a></h3><p>二つの物体の間には物体の質量に比例しその距離の二乗に反比例する引力（万有引力）</p><p class="math-container">\[F = - G \frac{Mm}{r^2}\]</p><p>が働きます。この力があるため、太陽の周りを地球などが回っているわけです。これをコードで示すことにします。</p><p>無次元化された運動方程式を</p><p class="math-container">\[\dot{x} = u, \dot{u} = - \frac{x}{|{\bm r}|^3}\]</p><p class="math-container">\[\dot{y} = v, \dot{v} = - \frac{y}{|{\bm r}|^3}\]</p><p>として、天体の動きを追いかけることとします。なお、簡単のためz方向には天体を固定し動かないこととしました。</p><p>方程式の時間発展にはいくつかの方法があります。微分方程式が</p><p class="math-container">\[\dot{x} = u, \dot{u} = \Phi(x)\]</p><p>と書ける時の時間発展法について述べます。方程式のエネルギーを保存させるためにはシンプレクティック解法と呼ばれる手法を用いる必要がありまして、ここではLeap-frog法とVelocity Verlet法を紹介します。</p><p><em>Leap-frog法</em></p><p class="math-container">\[u(t + \Delta t/2) = u(t - \Delta/2) + \Phi(x) \Delta t\]</p><p class="math-container">\[x(t + \Delta t) = x(t) + u(t + \Delta t/2) \Delta t\]</p><p>という形になりまして、<span>$\Delta/2$</span>だけ速度uを動かしてからxを更新します。tでの速度は</p><p class="math-container">\[u(t) = (u(t - \Delta/2) + u(t + \Delta/2))/2\]</p><p>と計算できます。最初のステップでは<span>$\Delta(-\Delta t/2)$</span>での値が必要ですので、これは方程式を逆に解いて</p><p class="math-container">\[\Delta(-\Delta t/2) = u(0) - \Phi(x) \Delta /2\]</p><p>とします。</p><p><em>Velocity Verlet法</em> Velocity Verlet法の場合には、</p><p class="math-container">\[x(t + \Delta t) = x(t) + u(t) \Delta t + \Phi(x) \frac{(\Delta t)^2}{2}\]</p><p class="math-container">\[u(t + \Delta t) = u(t) + (\Phi(x(t)) + \Phi(x(t+\Delta t))) \frac{\Delta t}{2}\]</p><p>とします。</p><h3 id="Leap-frog法による二体問題"><a class="docs-heading-anchor" href="#Leap-frog法による二体問題">Leap-frog法による二体問題</a><a id="Leap-frog法による二体問題-1"></a><a class="docs-heading-anchor-permalink" href="#Leap-frog法による二体問題" title="Permalink"></a></h3><p>Fortranで書かれたソースコードは<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/particle_sim/14energy_conservation.html">こちら</a>にあります。ここにあるコードをJuliaに移植してみました。</p><p>コードは</p><pre><code class="language-julia hljs">
+mandel_main()</code></pre><p>とすれば、BMP形式とPNG形式のグレースケールの画像を出力できます。</p><p>ここでの追加のポイントとしては</p><ol><li>グレースケール画像は0から1の範囲なので、255で割っている。</li><li>行列を可視化するような形に出力されるため、デフォルトではxが下方向、yが右方向になっている。これを変更するために、<code>img</code>を<code>&#39;</code>で転置した。</li></ol><p>です。Fortranと異なりJuliaはモダンな言語ですから、画像や動画の扱いが容易です。</p><h2 id="万有引力に従う天体の運動"><a class="docs-heading-anchor" href="#万有引力に従う天体の運動">万有引力に従う天体の運動</a><a id="万有引力に従う天体の運動-1"></a><a class="docs-heading-anchor-permalink" href="#万有引力に従う天体の運動" title="Permalink"></a></h2><p>こちらの<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/memo.html">サイト</a>では、万有引力に従う粒子の運動の解説とFortranコードの説明があります。ここにあるFortranコードをJuliaに移植してみることにします。</p><h3 id="基本方程式"><a class="docs-heading-anchor" href="#基本方程式">基本方程式</a><a id="基本方程式-1"></a><a class="docs-heading-anchor-permalink" href="#基本方程式" title="Permalink"></a></h3><p>二つの物体の間には物体の質量に比例しその距離の二乗に反比例する引力（万有引力）</p><p class="math-container">\[F = - G \frac{Mm}{r^2}\]</p><p>が働きます。この力があるため、太陽の周りを地球などが回っているわけです。これをコードで示すことにします。</p><p>無次元化された運動方程式を</p><p class="math-container">\[\dot{x} = u, \dot{u} = - \frac{x}{|{\bm r}|^3}\]</p><p class="math-container">\[\dot{y} = v, \dot{v} = - \frac{y}{|{\bm r}|^3}\]</p><p>として、天体の動きを追いかけることとします。なお、簡単のためz方向には天体を固定し動かないこととしました。</p><p>方程式の時間発展にはいくつかの方法があります。微分方程式が</p><p class="math-container">\[\dot{x} = u, \dot{u} = \Phi(x)\]</p><p>と書ける時の時間発展法について述べます。方程式のエネルギーを保存させるためにはシンプレクティック解法と呼ばれる手法を用いる必要がありまして、ここではLeap-frog法とVelocity Verlet法を紹介します。</p><p><em>Leap-frog法</em></p><p class="math-container">\[u(t + \Delta t/2) = u(t - \Delta/2) + \Phi(x) \Delta t\]</p><p class="math-container">\[x(t + \Delta t) = x(t) + u(t + \Delta t/2) \Delta t\]</p><p>という形になりまして、<span>$\Delta/2$</span>だけ速度uを動かしてからxを更新します。tでの速度は</p><p class="math-container">\[u(t) = (u(t - \Delta/2) + u(t + \Delta/2))/2\]</p><p>と計算できます。最初のステップでは<span>$\Delta(-\Delta t/2)$</span>での値が必要ですので、これは方程式を逆に解いて</p><p class="math-container">\[\Delta(-\Delta t/2) = u(0) - \Phi(x) \Delta /2\]</p><p>とします。</p><p><em>Velocity Verlet法</em></p><p>Velocity Verlet法の場合には、</p><p class="math-container">\[x(t + \Delta t) = x(t) + u(t) \Delta t + \Phi(x) \frac{(\Delta t)^2}{2}\]</p><p class="math-container">\[u(t + \Delta t) = u(t) + (\Phi(x(t)) + \Phi(x(t+\Delta t))) \frac{\Delta t}{2}\]</p><p>とします。</p><h3 id="Leap-frog法による二体問題"><a class="docs-heading-anchor" href="#Leap-frog法による二体問題">Leap-frog法による二体問題</a><a id="Leap-frog法による二体問題-1"></a><a class="docs-heading-anchor-permalink" href="#Leap-frog法による二体問題" title="Permalink"></a></h3><p>Fortranで書かれたソースコードは<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/particle_sim/14energy_conservation.html">こちら</a>にあります。ここにあるコードをJuliaに移植してみました。</p><p>コードは</p><pre><code class="language-julia hljs">
 module Subfunc
     export fx,fu,fy,fv
     function fx(u,v)
@@ -607,4 +607,503 @@ function celestial()
 
 
 end
-@time celestial()</code></pre><p>となります。リンク先のFortranコードを忠実に変換した形になっているかと思います。計算速度もほぼ同じになっているのが確認できると思います。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><a class="docs-footer-nextpage" href="../02/">FortranでできることをJuliaでやってみる »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Wednesday 25 August 2021 08:58">Wednesday 25 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+@time celestial()</code></pre><p>となります。リンク先のFortranコードを忠実に変換した形になっているかと思います。計算速度もほぼ同じになっているのが確認できると思います。</p><h3 id="Velocity-Verlet法によるN体問題"><a class="docs-heading-anchor" href="#Velocity-Verlet法によるN体問題">Velocity Verlet法によるN体問題</a><a id="Velocity-Verlet法によるN体問題-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-Verlet法によるN体問題" title="Permalink"></a></h3><p>次に、N体問題を解いてみます。こちらの<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/particle_sim/15many_body.html">ページ</a>を参考にしています。 複数の粒子がある場合は万有引力はそれぞれの粒子から受けますので、</p><p class="math-container">\[F({\bm x}_i) = - G \sum_{j} \frac{m_i m_j}{|{\bm r}_i - {\bm r}_j|^2}\]</p><p>となります。</p><p>それでは、太陽、地球、金星、火星、そして月の5つの天体が存在する場合の軌道を調べてみましょう。そのFortran版のコードは<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/particle_sim/15many_body.html">こちら</a>にあります。 このコードを手元のPCでコンパイルし、実行しますと、</p><pre><code class="nohighlight hljs"> current step:      100000 /total step:     1000000
+ current step:      200000 /total step:     1000000
+ current step:      300000 /total step:     1000000
+ current step:      400000 /total step:     1000000
+ current step:      500000 /total step:     1000000
+ current step:      600000 /total step:     1000000
+ current step:      700000 /total step:     1000000
+ current step:      800000 /total step:     1000000
+ current step:      900000 /total step:     1000000
+ Time step:   6.3717374890228697E-005
+ Average error of energy update:   1.0575727271732502E-021
+ CPU time:  0.38528799999999996  </code></pre><p>という結果が得られました。約0.4秒で実行が終わっていますね。このコードを素朴にJuliaのコードにしたものが</p><pre><code class="language-julia hljs">module Globals
+    export G,ndim,nbody
+    const G = 6.67384e-11
+    const ndim = 2
+    const nbody = 5
+end
+
+module Mod_Var_trajectory
+    using ..Globals
+    export Var_trajectory
+    Base.@kwdef struct Var_trajectory
+        coord::Array{Float64,2} = zeros(Float64,ndim,nbody)
+        veloc::Array{Float64,2} = zeros(Float64,ndim,nbody)
+    end
+end
+
+module Mod_Param_planet
+    using ..Globals
+    export Param_planet
+    Base.@kwdef struct Param_planet
+        mass::Array{Float64,1} = zeros(Float64,nbody)
+    end
+end
+
+module Cal_ene
+    using ..Globals
+    using ..Mod_Param_planet
+    export cal_kin,cal_pot
+    
+
+    function cal_kin(param::Param_planet,v)
+        e = 0.0
+        for i=1:nbody
+            v2 = 0.0
+            for j=1:ndim
+                v2 += v[j,i]^2
+            end 
+            e += 0.5*param.mass[i]*v2
+        end
+        return e
+    end
+
+    function cal_pot(param::Param_planet,c)
+        e = 0.0
+        rij = zeros(Float64,ndim)
+
+        for i=1:nbody-1
+            for j=i+1:nbody
+                rij[:] = c[:,j]-c[:,i]
+                rij2 = 0.0
+                for k=1:ndim
+                    rij2 += rij[k]^2
+                end 
+                rij_abs = sqrt(rij2)
+                e +=  param.mass[i]*param.mass[j]/rij_abs
+            end 
+        end 
+        return e
+    end
+end
+
+module Cal_force
+    using ..Globals
+    using ..Mod_Param_planet
+    export force!
+
+    function force!(param::Param_planet,c,a)
+        f = zeros(Float64,ndim,nbody)
+        rij = zeros(Float64,ndim)
+        fij = zeros(Float64,ndim)
+
+        for i = 1:nbody-1
+            for j = i+1:nbody
+                rij[:] = c[:,j]-c[:,i]
+                rij2 = 0.0
+                for k=1:ndim
+                    rij2 +=  rij[k]^2
+                end 
+                rij_abs = sqrt(rij2)
+                inv_rij_abs = 1.0/rij_abs
+                ftmp = param.mass[i]*param.mass[j]*(inv_rij_abs^3)
+                @. fij = ftmp*rij
+                f[:,i] = f[:,i] + fij[:]
+                f[:,j] = f[:,j] - fij[:]
+            end 
+        end 
+
+        for i = 1:nbody
+            a[:,i] = f[:,i] / param.mass[i]
+        end 
+    end
+end
+
+using .Globals
+using .Mod_Var_trajectory
+using .Mod_Param_planet
+using .Cal_ene
+using .Cal_force
+
+function celestial()
+    n=10^6
+    noutmax=10000
+    nlive=10
+
+    accel = zeros(Float64,ndim,nbody)
+
+    #!----- mass
+    param_planet = Param_planet()
+    mass = param_planet.mass
+    mass[1] = 1.989e30          # mass of sun[kg]
+    mass[2] = 5.972e24          # mass of earth[kg]
+    mass[3] = 4.869e24          # venus
+    mass[4] = 6.419e23          # mars
+    mass[5] = 7.348e22          # mass of moon[kg]
+    
+
+    var_trajectory = Var_trajectory()
+    coord = var_trajectory.coord
+    #!----- initial conditions
+    coord[1,1] = 0.0
+    coord[2,1] = 0.0
+    coord[1,2] = 1.496e11       #!average radius of revolution of earth[m]
+    coord[2,2] = 0.0
+    coord[1,3] = 1.082e11
+    coord[2,3]= 0.0
+    coord[1,4] = 2.279e11
+    coord[2,4] = 0.0
+    coord[1,5] = 3.844e8        #!average radius of revolution of moon[m]
+    coord[1,5] += coord[1,2] 
+    coord[2,5] = 0.0
+
+    veloc = var_trajectory.veloc
+    veloc[1,1] = 0.0
+    veloc[2,1] = 0.0
+    veloc[1,2] = 0.0
+    veloc[2,2] = 2.978e4        #!average velocity of earth[m/s]
+    veloc[1,3] = 0.0
+    veloc[2,3] = 3.502e4
+    veloc[1,4] = 0.0
+    veloc[2,4] = 2.413e4
+    veloc[1,5] = 0.0
+    veloc[2,5] = 1.022e3        #!average velocity of moon[m/s]
+    veloc[2,5] += veloc[2,2] 
+    
+
+    #!----- time
+    t = 0.0
+    tmax = 3.2e8              #!365day*24hour*60min*60sec = 31536000sec = 3.2d7
+    
+    #!----- normalizse
+    cnor = sqrt((coord[1,2]-coord[1,1])^2 + (coord[2,2]-coord[2,1])^2)
+    mnor = mass[1]
+    tnor = sqrt(cnor^3/(G*mnor))
+    vnor = cnor/tnor
+    
+    @. var_trajectory.coord = coord/cnor
+    @. var_trajectory.veloc = veloc/vnor
+    @. param_planet.mass = mass/mnor
+    t = t/tnor
+    tmax = tmax/tnor
+
+
+    dt = (tmax-t)/n
+    dt2 = 0.5*dt
+
+    sum_dE  = 0.0
+    E0 = 0.0
+    Eold = 0.0
+
+    fp = open(&quot;outputNvV_julia_vv.dat&quot;,&quot;w&quot;)
+    println(fp,&quot;t_NvV, E_NvV, dE_NvV, x1_NvV, y1_NvV, x2_NvV, y2_NvV, 
+      x3_NvV, y3_NvV, x4_NvV, y4_NvV, x5_NvV, y5_NvV&quot;)
+
+    nliveout = n ÷  nlive
+    if n &gt; noutmax
+        dout = n ÷ noutmax
+    else
+        dout = 1
+    end
+
+
+    for i = 1:n-1
+
+        if i % nliveout == 0
+            println(&quot;current step: $i,/total step: $n&quot;)
+        end
+    
+        if i == 1
+            Ev = cal_kin(param_planet,veloc)
+            Ep = cal_pot(param_planet,coord)
+            E0 = Ev-Ep
+            Eold = E0   
+        end
+
+        Ev = cal_kin(param_planet,veloc)
+        Ep = cal_pot(param_planet,coord)
+        E = Ev-Ep
+        dE = abs((E - E0)/E0)
+        sum_dE += abs(E-Eold)
+
+        if (i-1) % dout == 0
+            println(fp,
+            t,&quot;\t&quot;,&#39;,&#39;,E,&quot;\t&quot;,&#39;,&#39;,dE,&quot;\t&quot;,&#39;,&#39;,coord[1,1],&quot;\t&quot;,&#39;,&#39;,coord[2,1],&quot;\t&quot;,&#39;,&#39;,coord[1,2],&quot;\t&quot;,&#39;,&#39;,coord[2,2],&quot;\t&quot;,&#39;,&#39;,coord[1,3]
+            ,&quot;\t&quot;,&#39;,&#39;,coord[2,3],&quot;\t&quot;,&#39;,&#39;,coord[1,4],&quot;\t&quot;,&#39;,&#39;,coord[2,4],&quot;\t&quot;,&#39;,&#39;,coord[1,5],&quot;\t&quot;,&#39;,&#39;,coord[2,5]
+            )
+        end
+
+        #println(coord)
+        if i == 1
+            force!(param_planet,coord,accel)
+        end
+        #println(accel)
+        #exit()
+
+        @. veloc += dt2*accel
+        @. coord += dt*veloc
+        force!(param_planet,coord,accel)
+        @. veloc += dt2*accel
+
+        t = t + dt
+        Eold = E
+    end
+    
+    close(fp)
+
+    println(&quot;Time step: &quot;,dt)
+    println(&quot;Average error of energy update: &quot;,sum_dE/n)
+end
+@time celestial()</code></pre><p>こちらです。なるべく元のコードと同じ形になるように移植しました。 このコードのポイントは</p><ol><li>Fortranでのmoduleを用いた「グローバル変数」のような扱い（ここでは<code>mass</code>等）を、全て独自型としてまとめて引数に入れるようにした</li><li>1.を行った結果<code>var_trajectory.mass</code>のように変数名が長くなってしまったので、<code>mass = var_trajectory.mass</code>のように参照用の変数を導入した。このようにすると<code>mass</code>の中身を書き換えたときに<code>var_trajectory.mass</code>も書き換わる。<code>veloc = var_trajectory.veloc</code>や<code>coord = var_trajectory.coord</code>も同様</li><li>配列の要素にまとめて入れるために<code>@.</code>マクロを使用した。<code>@. var_trajectory.coord = coord/cnor</code>などで使用</li></ol><p>となります。このコードですが、同じPCで実行すると、</p><pre><code class="nohighlight hljs">current step: 100000,/total step: 1000000
+current step: 200000,/total step: 1000000
+current step: 300000,/total step: 1000000
+current step: 400000,/total step: 1000000
+current step: 500000,/total step: 1000000
+current step: 600000,/total step: 1000000
+current step: 700000,/total step: 1000000
+current step: 800000,/total step: 1000000
+current step: 900000,/total step: 1000000
+Time step: 6.37173748902287e-5
+Average error of energy update: 1.0575727271732502e-21
+  5.327849 seconds (134.88 M allocations: 12.121 GiB, 4.46% gc time, 3.86% compilation time)</code></pre><p>となり、&quot;Average error of energy update&quot;は倍精度の範囲で結果が一致していることがわかります。ただし、計算時間が5.3秒もかかってしまっていて遅いです。</p><p>これを高速化する方法は簡単です。メモリーアロケーションが<code>134.88 M allocations</code>となっていますから、これは不必要なメモリ確保が沢山生じていることを意味しています。どこにそれがあるかをみてみますと、</p><pre><code class="language-julia hljs">rij[:] = c[:,j]-c[:,i]</code></pre><p>などです。右辺の<code>c[:,j]</code>は行列でいうところの1列だけを取り出しています。Juliaでは<code>:</code>を右辺で使って配列の一部範囲を取り出す場合、配列のコピーが発生してしまいます。これを避けるには<code>@view</code>というマクロを使うか、素朴に</p><pre><code class="language-julia hljs">for k=1:length(rij) 
+  rij[k] = c[k,j]-c[k,i]
+end</code></pre><p>のようにループするかです。ループの方がシンプルなので、複数の該当箇所をループに置き換えてみると、</p><pre><code class="language-julia hljs">module Globals
+    export G,ndim,nbody
+    const G = 6.67384e-11
+    const ndim = 2
+    const nbody = 5
+end
+
+module Mod_Var_trajectory
+    using ..Globals
+    export Var_trajectory
+    Base.@kwdef struct Var_trajectory
+        coord::Array{Float64,2} = zeros(Float64,ndim,nbody)
+        veloc::Array{Float64,2} = zeros(Float64,ndim,nbody)
+    end
+end
+
+module Mod_Param_planet
+    using ..Globals
+    export Param_planet
+    Base.@kwdef struct Param_planet
+        mass::Array{Float64,1} = zeros(Float64,nbody)
+    end
+end
+
+module Cal_ene
+    using ..Globals
+    using ..Mod_Param_planet
+    export cal_kin,cal_pot
+    
+
+    function cal_kin(param::Param_planet,v)
+        e = 0.0
+        for i=1:nbody
+            v2 = 0.0
+            for j=1:ndim
+                v2 += v[j,i]^2
+            end 
+            e += 0.5*param.mass[i]*v2
+        end
+        return e
+    end
+
+    function cal_pot(param::Param_planet,c)
+        e = 0.0
+        rij = zeros(Float64,ndim)
+
+        for i=1:nbody-1
+            for j=i+1:nbody
+                for k=1:ndim
+                    rij[k] = c[k,j]-c[k,i]
+                end
+                rij2 = 0.0
+                for k=1:ndim
+                    rij2 += rij[k]^2
+                end 
+                rij_abs = sqrt(rij2)
+                e +=  param.mass[i]*param.mass[j]/rij_abs
+            end 
+        end 
+        return e
+    end
+end
+
+module Cal_force
+    using ..Globals
+    using ..Mod_Param_planet
+    export force!
+
+    function force!(param::Param_planet,c,a)
+        f = zeros(Float64,ndim,nbody)
+        rij = zeros(Float64,ndim)
+        fij = zeros(Float64,ndim)
+
+        for i = 1:nbody-1
+            for j = i+1:nbody
+                for k=1:ndim
+                    rij[k] = c[k,j]-c[k,i]
+                end
+                rij2 = 0.0
+                for k=1:ndim
+                    rij2 +=  rij[k]^2
+                end 
+                rij_abs = sqrt(rij2)
+                inv_rij_abs = 1.0/rij_abs
+                ftmp = param.mass[i]*param.mass[j]*(inv_rij_abs^3)
+                @. fij = ftmp*rij
+                for k=1:ndim
+                    f[k,i] = f[k,i] + fij[k]
+                    f[k,j] = f[k,j] - fij[k]
+                end
+            end 
+        end 
+
+        for i = 1:nbody
+            for k=1:ndim
+                a[k,i] = f[k,i] / param.mass[i]
+            end
+        end 
+    end
+end
+
+using .Globals
+using .Mod_Var_trajectory
+using .Mod_Param_planet
+using .Cal_ene
+using .Cal_force
+
+function celestial()
+    n=10^6
+    noutmax=10000
+    nlive=10
+
+    accel = zeros(Float64,ndim,nbody)
+
+    #!----- mass
+    param_planet = Param_planet()
+    mass = param_planet.mass
+    mass[1] = 1.989e30          # mass of sun[kg]
+    mass[2] = 5.972e24          # mass of earth[kg]
+    mass[3] = 4.869e24          # venus
+    mass[4] = 6.419e23          # mars
+    mass[5] = 7.348e22          # mass of moon[kg]
+    
+
+    var_trajectory = Var_trajectory()
+    coord = var_trajectory.coord
+    #!----- initial conditions
+    coord[1,1] = 0.0
+    coord[2,1] = 0.0
+    coord[1,2] = 1.496e11       #!average radius of revolution of earth[m]
+    coord[2,2] = 0.0
+    coord[1,3] = 1.082e11
+    coord[2,3]= 0.0
+    coord[1,4] = 2.279e11
+    coord[2,4] = 0.0
+    coord[1,5] = 3.844e8        #!average radius of revolution of moon[m]
+    coord[1,5] += coord[1,2] 
+    coord[2,5] = 0.0
+
+    veloc = var_trajectory.veloc
+    veloc[1,1] = 0.0
+    veloc[2,1] = 0.0
+    veloc[1,2] = 0.0
+    veloc[2,2] = 2.978e4        #!average velocity of earth[m/s]
+    veloc[1,3] = 0.0
+    veloc[2,3] = 3.502e4
+    veloc[1,4] = 0.0
+    veloc[2,4] = 2.413e4
+    veloc[1,5] = 0.0
+    veloc[2,5] = 1.022e3        #!average velocity of moon[m/s]
+    veloc[2,5] += veloc[2,2] 
+    
+
+    #!----- time
+    t = 0.0
+    tmax = 3.2e8              #!365day*24hour*60min*60sec = 31536000sec = 3.2d7
+    
+    #!----- normalizse
+    cnor = sqrt((coord[1,2]-coord[1,1])^2 + (coord[2,2]-coord[2,1])^2)
+    mnor = mass[1]
+    tnor = sqrt(cnor^3/(G*mnor))
+    vnor = cnor/tnor
+    
+    @. var_trajectory.coord = coord/cnor
+    @. var_trajectory.veloc = veloc/vnor
+    @. param_planet.mass = mass/mnor
+    t = t/tnor
+    tmax = tmax/tnor
+
+
+    dt = (tmax-t)/n
+    dt2 = 0.5*dt
+
+    sum_dE  = 0.0
+    E0 = 0.0
+    Eold = 0.0
+
+    fp = open(&quot;outputNvV_julia_vv.dat&quot;,&quot;w&quot;)
+    println(fp,&quot;t_NvV, E_NvV, dE_NvV, x1_NvV, y1_NvV, x2_NvV, y2_NvV, 
+      x3_NvV, y3_NvV, x4_NvV, y4_NvV, x5_NvV, y5_NvV&quot;)
+
+    nliveout = n ÷  nlive
+    if n &gt; noutmax
+        dout = n ÷ noutmax
+    else
+        dout = 1
+    end
+
+
+    for i = 1:n-1
+
+        if i % nliveout == 0
+            println(&quot;current step: $i,/total step: $n&quot;)
+        end
+    
+        if i == 1
+            Ev = cal_kin(param_planet,veloc)
+            Ep = cal_pot(param_planet,coord)
+            E0 = Ev-Ep
+            Eold = E0   
+        end
+
+        Ev = cal_kin(param_planet,veloc)
+        Ep = cal_pot(param_planet,coord)
+        E = Ev-Ep
+        dE = abs((E - E0)/E0)
+        sum_dE += abs(E-Eold)
+
+        if (i-1) % dout == 0
+            println(fp,
+            t,&quot;\t&quot;,&#39;,&#39;,E,&quot;\t&quot;,&#39;,&#39;,dE,&quot;\t&quot;,&#39;,&#39;,coord[1,1],&quot;\t&quot;,&#39;,&#39;,coord[2,1],&quot;\t&quot;,&#39;,&#39;,coord[1,2],&quot;\t&quot;,&#39;,&#39;,coord[2,2],&quot;\t&quot;,&#39;,&#39;,coord[1,3]
+            ,&quot;\t&quot;,&#39;,&#39;,coord[2,3],&quot;\t&quot;,&#39;,&#39;,coord[1,4],&quot;\t&quot;,&#39;,&#39;,coord[2,4],&quot;\t&quot;,&#39;,&#39;,coord[1,5],&quot;\t&quot;,&#39;,&#39;,coord[2,5]
+            )
+        end
+
+        #println(coord)
+        if i == 1
+            force!(param_planet,coord,accel)
+        end
+        #println(accel)
+        #exit()
+
+        @. veloc += dt2*accel
+        @. coord += dt*veloc
+        force!(param_planet,coord,accel)
+        @. veloc += dt2*accel
+
+        t = t + dt
+        Eold = E
+    end
+    
+    close(fp)
+
+    println(&quot;Time step: &quot;,dt)
+    println(&quot;Average error of energy update: &quot;,sum_dE/n)
+end
+@time celestial()</code></pre><p>となります。 この実行結果は、</p><pre><code class="nohighlight hljs">current step: 100000,/total step: 1000000
+current step: 200000,/total step: 1000000
+current step: 300000,/total step: 1000000
+current step: 400000,/total step: 1000000
+current step: 500000,/total step: 1000000
+current step: 600000,/total step: 1000000
+current step: 700000,/total step: 1000000
+current step: 800000,/total step: 1000000
+current step: 900000,/total step: 1000000
+Time step: 6.37173748902287e-5
+Average error of energy update: 1.0575727271732502e-21
+  0.700156 seconds (4.88 M allocations: 509.987 MiB, 12.72% gc time, 30.04% compilation time)</code></pre><p>となり、計算速度がFortranとほぼ同じオーダーとなります。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><a class="docs-footer-nextpage" href="../02/">FortranでできることをJuliaでやってみる »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Wednesday 25 August 2021 12:27">Wednesday 25 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
