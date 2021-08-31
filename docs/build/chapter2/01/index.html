@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>FortranのコードをJuliaへ移植してみる · Fortranから始めるJulia</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fortranから始めるJulia</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Fortranから始めるJulia</a></li><li><a class="tocitem" href="../../chapter1/01/">FortranとJuliaの文法比較</a></li><li><a class="tocitem" href="../../chapter1/02/">線形代数計算</a></li><li class="is-active"><a class="tocitem" href>FortranのコードをJuliaへ移植してみる</a><ul class="internal"><li><a class="tocitem" href="#マンデルブロ集合"><span>マンデルブロ集合</span></a></li><li><a class="tocitem" href="#万有引力に従う天体の運動"><span>万有引力に従う天体の運動</span></a></li></ul></li><li><a class="tocitem" href="../02/">FortranでできることをJuliaでやってみる</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>FortranのコードをJuliaへ移植してみる</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>FortranのコードをJuliaへ移植してみる</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/cometscome/JuliaFromFortran/blob/master/docs/src/chapter2/01.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="FortranのコードをJuliaへ移植してみる"><a class="docs-heading-anchor" href="#FortranのコードをJuliaへ移植してみる">FortranのコードをJuliaへ移植してみる</a><a id="FortranのコードをJuliaへ移植してみる-1"></a><a class="docs-heading-anchor-permalink" href="#FortranのコードをJuliaへ移植してみる" title="Permalink"></a></h1><h2 id="マンデルブロ集合"><a class="docs-heading-anchor" href="#マンデルブロ集合">マンデルブロ集合</a><a id="マンデルブロ集合-1"></a><a class="docs-heading-anchor-permalink" href="#マンデルブロ集合" title="Permalink"></a></h2><p>こちらの<a href="https://qiita.com/cure_honey/items/795bd0e048ffeadc3e63">記事</a>にはさまざまなFortranのバージョンで書かれたマンデルブロ集合のコードが紹介されています。</p><h3 id="Fortran90"><a class="docs-heading-anchor" href="#Fortran90">Fortran90</a><a id="Fortran90-1"></a><a class="docs-heading-anchor-permalink" href="#Fortran90" title="Permalink"></a></h3><p>この記事の中のFortran90のコードを引用します。コードは</p><pre><code class="language-fortran hljs">PROGRAM mandel
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>FortranのコードをJuliaへ移植してみる · Fortranから始めるJulia</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">Fortranから始めるJulia</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Fortranから始めるJulia</a></li><li><a class="tocitem" href="../../chapter1/01/">FortranとJuliaの文法比較</a></li><li><a class="tocitem" href="../../chapter1/02/">線形代数計算</a></li><li class="is-active"><a class="tocitem" href>FortranのコードをJuliaへ移植してみる</a><ul class="internal"><li><a class="tocitem" href="#マンデルブロ集合"><span>マンデルブロ集合</span></a></li><li><a class="tocitem" href="#万有引力に従う天体の運動"><span>万有引力に従う天体の運動</span></a></li><li><a class="tocitem" href="#次元Ising模型"><span>2次元Ising模型</span></a></li></ul></li><li><a class="tocitem" href="../02/">FortranでできることをJuliaでやってみる</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>FortranのコードをJuliaへ移植してみる</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>FortranのコードをJuliaへ移植してみる</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/cometscome/JuliaFromFortran/blob/master/docs/src/chapter2/01.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="FortranのコードをJuliaへ移植してみる"><a class="docs-heading-anchor" href="#FortranのコードをJuliaへ移植してみる">FortranのコードをJuliaへ移植してみる</a><a id="FortranのコードをJuliaへ移植してみる-1"></a><a class="docs-heading-anchor-permalink" href="#FortranのコードをJuliaへ移植してみる" title="Permalink"></a></h1><h2 id="マンデルブロ集合"><a class="docs-heading-anchor" href="#マンデルブロ集合">マンデルブロ集合</a><a id="マンデルブロ集合-1"></a><a class="docs-heading-anchor-permalink" href="#マンデルブロ集合" title="Permalink"></a></h2><p>こちらの<a href="https://qiita.com/cure_honey/items/795bd0e048ffeadc3e63">記事</a>にはさまざまなFortranのバージョンで書かれたマンデルブロ集合のコードが紹介されています。</p><h3 id="Fortran90"><a class="docs-heading-anchor" href="#Fortran90">Fortran90</a><a id="Fortran90-1"></a><a class="docs-heading-anchor-permalink" href="#Fortran90" title="Permalink"></a></h3><p>この記事の中のFortran90のコードを引用します。コードは</p><pre><code class="language-fortran">PROGRAM mandel
     IMPLICIT NONE
     INTEGER, PARAMETER :: nx = 61, ny = 31, maxiter = 90
     REAL   , PARAMETER :: x0 = -2.0, x1 = 2.0, y0 = -2.0, y1 = 2.0
@@ -24,7 +24,7 @@
       PRINT &#39;(61I1)&#39;, (mandelbrot(:, iy) + 9) / 10 
     END DO          
     STOP
-END PROGRAM mandel</code></pre><p>です。このコードをgfortranでコンパイルし、実行しますと、</p><pre><code class="nohighlight hljs">0000000000000000000000000000001000000000000000000000000000000
+END PROGRAM mandel</code></pre><p>です。このコードをgfortranでコンパイルし、実行しますと、</p><pre><code class="language-none">0000000000000000000000000000001000000000000000000000000000000
 0000000000000000000011111111111111111111100000000000000000000
 0000000000000000111111111111111111111111111110000000000000000
 0000000000001111111111111111111111111111111111111000000000000
@@ -54,7 +54,7 @@ END PROGRAM mandel</code></pre><p>です。このコードをgfortranでコン�
 0000000000001111111111111111111111111111111111111000000000000
 0000000000000000111111111111111111111111111110000000000000000
 0000000000000000000011111111111111111111100000000000000000000
-0000000000000000000000000000001000000000000000000000000000000</code></pre><p>という出力が得られます。この出力を再現するようなJuliaのコードを書いてみましょう。</p><p>作ったJuliaのコードは</p><pre><code class="language-julia hljs">function mandel()
+0000000000000000000000000000001000000000000000000000000000000</code></pre><p>という出力が得られます。この出力を再現するようなJuliaのコードを書いてみましょう。</p><p>作ったJuliaのコードは</p><pre><code class="language-julia">function mandel()
     nx = 61; ny = 31; maxiter = 90
     x0 = -2.0; x1 = 2.0; y0 = -2.0; y1 = 2.0
     mandelbrot = zeros(Int64,nx, ny)
@@ -86,7 +86,7 @@ END PROGRAM mandel</code></pre><p>です。このコードをgfortranでコン�
         println(&quot;\t&quot;)
     end
 end
-mandel()</code></pre><p>です。</p><p>ポイントは</p><ol><li><code>program mandel</code>を<code>function mandel()</code>に変更</li><li><code>;</code>を使い一行に複数の文を入れた</li><li>配列<code>mandelbrot</code>を<code>mandelbrot = zeros(Int64,nx, ny)</code>で定義</li><li>Fortranでループを抜けるexitは、対応するbreakに変更</li><li>Fortranは<code>do iter = 0, maxiter</code>のループの途中で抜けた場合<code>iter</code>には抜けた時の値が入っているが、Juliaでは<code>iter</code>のスコープがローカルなので外では未定義になっている。そのため、<code>mandelbrot[ix,iy] = iter</code>とした</li><li><code>iter</code>のループが最大まで到達した時に、Fortranでは<code>mandelbrot(ix, iy)</code>の中身はループの最後の値<code>maxiter</code>になるが、Juliaでは前述のように<code>iter</code>はローカルスコープの変数なので値が入らない。なので、最初に<code>mandelbrot .= maxiter</code>と初期化した</li></ol><p>などです。見比べるとはっきりとわかりますが、Fortran90のコードとJuliaのコードはよく似ています。</p><h3 id="Fortran90-モジュールを使用"><a class="docs-heading-anchor" href="#Fortran90-モジュールを使用">Fortran90 モジュールを使用</a><a id="Fortran90-モジュールを使用-1"></a><a class="docs-heading-anchor-permalink" href="#Fortran90-モジュールを使用" title="Permalink"></a></h3><p>次は、モジュールを使用したコードをJuliaコードに変化させてみます。 コードはこちらの<a href="https://qiita.com/cure_honey/items/795bd0e048ffeadc3e63">記事</a>からの引用しまして、</p><pre><code class="language-fortran hljs">MODULE m_mandel
+mandel()</code></pre><p>です。</p><p>ポイントは</p><ol><li><code>program mandel</code>を<code>function mandel()</code>に変更</li><li><code>;</code>を使い一行に複数の文を入れた</li><li>配列<code>mandelbrot</code>を<code>mandelbrot = zeros(Int64,nx, ny)</code>で定義</li><li>Fortranでループを抜けるexitは、対応するbreakに変更</li><li>Fortranは<code>do iter = 0, maxiter</code>のループの途中で抜けた場合<code>iter</code>には抜けた時の値が入っているが、Juliaでは<code>iter</code>のスコープがローカルなので外では未定義になっている。そのため、<code>mandelbrot[ix,iy] = iter</code>とした</li><li><code>iter</code>のループが最大まで到達した時に、Fortranでは<code>mandelbrot(ix, iy)</code>の中身はループの最後の値<code>maxiter</code>になるが、Juliaでは前述のように<code>iter</code>はローカルスコープの変数なので値が入らない。なので、最初に<code>mandelbrot .= maxiter</code>と初期化した</li></ol><p>などです。見比べるとはっきりとわかりますが、Fortran90のコードとJuliaのコードはよく似ています。</p><h3 id="Fortran90-モジュールを使用"><a class="docs-heading-anchor" href="#Fortran90-モジュールを使用">Fortran90 モジュールを使用</a><a id="Fortran90-モジュールを使用-1"></a><a class="docs-heading-anchor-permalink" href="#Fortran90-モジュールを使用" title="Permalink"></a></h3><p>次は、モジュールを使用したコードをJuliaコードに変化させてみます。 コードはこちらの<a href="https://qiita.com/cure_honey/items/795bd0e048ffeadc3e63">記事</a>からの引用しまして、</p><pre><code class="language-fortran">MODULE m_mandel
     IMPLICIT NONE
     INTEGER, PARAMETER :: maxiter = 90
   CONTAINS
@@ -120,7 +120,7 @@ mandel()</code></pre><p>です。</p><p>ポイントは</p><ol><li><code>program
       PRINT &#39;(61i1)&#39;, (mandelbrot(:, iy) + 9) / 10  
     END DO    
     STOP
-  END PROGRAM mandel_main</code></pre><p>というものです。</p><p>このコードをJuliaに移植してみますと、</p><pre><code class="language-julia hljs">module M_mandel
+  END PROGRAM mandel_main</code></pre><p>というものです。</p><p>このコードをJuliaに移植してみますと、</p><pre><code class="language-julia">module M_mandel
     const maxiter = 90
     export mandel,maxiter
 
@@ -163,7 +163,7 @@ function mandel_main()
         println(&quot;\t&quot;)
     end
 end
-mandel_main()</code></pre><p>となります。</p><p>一つ目のFortran90コードで気をつけたポイントの他には、</p><ol><li><code>MODULE</code>は<code>module</code>に。モジュールの名前はJuliaでは最初の一文字を大文字にする慣例があるのでそれにならった</li><li><code>USE m_mandel</code>は<code>using .M_mandel</code>に。関数の中ではなく、外に定義する</li><li>Fortranではモジュール内で宣言した変数や関数はデフォルトで<code>share</code>属性を持っており<code>use</code>ですぐに使えるが、Juliaの場合に同様にしたい場合には<code>export</code>をモジュール内で使っておく。使わない場合は<code>M_mandel.mandel(x+im*y)</code>とアクセスすることになる</li></ol><p>ということに気をつけました。</p><h3 id="Fortran2003"><a class="docs-heading-anchor" href="#Fortran2003">Fortran2003</a><a id="Fortran2003-1"></a><a class="docs-heading-anchor-permalink" href="#Fortran2003" title="Permalink"></a></h3><p>次は、同じ<a href="https://qiita.com/cure_honey/items/795bd0e048ffeadc3e63">記事</a>のFortran2003のコードをJuliaに移植してみます。Fortranのコードを引用すると</p><pre><code class="language-fortran hljs">program mandel
+mandel_main()</code></pre><p>となります。</p><p>一つ目のFortran90コードで気をつけたポイントの他には、</p><ol><li><code>MODULE</code>は<code>module</code>に。モジュールの名前はJuliaでは最初の一文字を大文字にする慣例があるのでそれにならった</li><li><code>USE m_mandel</code>は<code>using .M_mandel</code>に。関数の中ではなく、外に定義する</li><li>Fortranではモジュール内で宣言した変数や関数はデフォルトで<code>share</code>属性を持っており<code>use</code>ですぐに使えるが、Juliaの場合に同様にしたい場合には<code>export</code>をモジュール内で使っておく。使わない場合は<code>M_mandel.mandel(x+im*y)</code>とアクセスすることになる</li></ol><p>ということに気をつけました。</p><h3 id="Fortran2003"><a class="docs-heading-anchor" href="#Fortran2003">Fortran2003</a><a id="Fortran2003-1"></a><a class="docs-heading-anchor-permalink" href="#Fortran2003" title="Permalink"></a></h3><p>次は、同じ<a href="https://qiita.com/cure_honey/items/795bd0e048ffeadc3e63">記事</a>のFortran2003のコードをJuliaに移植してみます。Fortranのコードを引用すると</p><pre><code class="language-fortran">program mandel
     implicit none
     integer, parameter :: maxiter = 90, nx = 61, ny = 31
     real   , parameter :: x0 = -2.0, x1 = 2.0, y0 = -2.0, y1 = 2.0
@@ -186,7 +186,7 @@ mandel_main()</code></pre><p>となります。</p><p>一つ目のFortran90コ�
       write(*, &#39;(61a1)&#39;) (text(m(ix):m(ix)), ix = 1, nx)  
     end do
     stop
-end program mandel</code></pre><p>となります。このコードをコンパイルして実行すると、</p><pre><code class="nohighlight hljs">||||||||||||||||||||||||||||||+||||||||||||||||||||||||||||||
+end program mandel</code></pre><p>となります。このコードをコンパイルして実行すると、</p><pre><code class="language-none">||||||||||||||||||||||||||||||+||||||||||||||||||||||||||||||
 ||||||||||||||||||||+++++++++++++++++++++||||||||||||||||||||
 ||||||||||||||||+++++++++++++++++++++++++++++||||||||||||||||
 ||||||||||||+++++++++++++++++++++++++++++++++++++||||||||||||
@@ -216,7 +216,7 @@ end program mandel</code></pre><p>となります。このコードをコンパ�
 ||||||||||||++++++++++++++++++++++++++++++++++++|||||||||||||
 ||||||||||||||||+++++++++++++++++++++++++++++||||||||||||||||
 ||||||||||||||||||||+++++++++++++++++++++||||||||||||||||||||
-||||||||||||||||||||||||||||||+||||||||||||||||||||||||||||||</code></pre><p>となります。</p><p>対応するJuliaのコードは</p><pre><code class="language-julia hljs">function mandel()
+||||||||||||||||||||||||||||||+||||||||||||||||||||||||||||||</code></pre><p>となります。</p><p>対応するJuliaのコードは</p><pre><code class="language-julia">function mandel()
     maxiter = 90;nx = 61; ny = 31
     x0 = -2.0; x1 = 2.0; y0 = -2.0; y1 = 2.0
 
@@ -242,7 +242,7 @@ end program mandel</code></pre><p>となります。このコードをコンパ�
         println(&quot;\t&quot;)
     end
 end
-mandel()</code></pre><p>です。Fortranでのwhere構文（配列の各要素に条件式を当てはめてループする構文）のJulia対応が分かりませんでしたので、仕方がないので<code>for</code>ループを使いました。ただし、そのまま書いても芸がありませんので、2次元配列のzなどを1次元配列として取り出す方法を使ってみました。Juliaでは2次元配列をメモリ格納順に並べた1次元のインデックスを用いて値を操作することができます。</p><p>今回は</p><ol><li>for文のリスト内包表記<code>[ (x1 - x0) / (nx - 1) * (ix - 1) + x0  for ix = 1:nx]</code>の使用</li><li>Fortranの<code>forall</code>の代わりに二重forループのリスト内包表記の使用</li><li>配列の各要素にまとめて演算するために<code>.</code>を使ったブロードキャストを使用（<code>m = (mandelbrot[:, iy] .+ 8) .÷ 10  .+ 1</code>）</li></ol><p>を行いました。</p><h3 id="Fortran2003-オブジェクト指向"><a class="docs-heading-anchor" href="#Fortran2003-オブジェクト指向">Fortran2003 オブジェクト指向</a><a id="Fortran2003-オブジェクト指向-1"></a><a class="docs-heading-anchor-permalink" href="#Fortran2003-オブジェクト指向" title="Permalink"></a></h3><p>次は、同じ記事のオブジェクト指向で書かれたFortranコードをJuliaに移植してみます。 コードは</p><pre><code class="language-fortran hljs">module m_bmp
+mandel()</code></pre><p>です。Fortranでのwhere構文（配列の各要素に条件式を当てはめてループする構文）のJulia対応が分かりませんでしたので、仕方がないので<code>for</code>ループを使いました。ただし、そのまま書いても芸がありませんので、2次元配列のzなどを1次元配列として取り出す方法を使ってみました。Juliaでは2次元配列をメモリ格納順に並べた1次元のインデックスを用いて値を操作することができます。</p><p>今回は</p><ol><li>for文のリスト内包表記<code>[ (x1 - x0) / (nx - 1) * (ix - 1) + x0  for ix = 1:nx]</code>の使用</li><li>Fortranの<code>forall</code>の代わりに二重forループのリスト内包表記の使用</li><li>配列の各要素にまとめて演算するために<code>.</code>を使ったブロードキャストを使用（<code>m = (mandelbrot[:, iy] .+ 8) .÷ 10  .+ 1</code>）</li></ol><p>を行いました。</p><h3 id="Fortran2003-オブジェクト指向"><a class="docs-heading-anchor" href="#Fortran2003-オブジェクト指向">Fortran2003 オブジェクト指向</a><a id="Fortran2003-オブジェクト指向-1"></a><a class="docs-heading-anchor-permalink" href="#Fortran2003-オブジェクト指向" title="Permalink"></a></h3><p>次は、同じ記事のオブジェクト指向で書かれたFortranコードをJuliaに移植してみます。 コードは</p><pre><code class="language-fortran">module m_bmp
     implicit none
     type :: t_bmp_file_header
       sequence                      ! 14bytes
@@ -355,7 +355,7 @@ mandel()</code></pre><p>です。Fortranでのwhere構文（配列の各要素�
     call bmp%wr(&#39;test&#39;)
     print *, &#39;BMP size: &#39;, bmp
     stop 
-  end program mandel_main</code></pre><p>です。このコードですが、gfortranでコンパイルしようとしても失敗してしまいました。<a href="https://fortran-lang.discourse.group/t/a-gfortran-issue-with-parameterized-derived-types/213">こちら</a>によると、どうやら「Fortran2003 で導入されたパラメータ付派生型(parameterized derived type)」がgfortranがこの機能にフルに対応していないようです。ですので、このコードの実行を確認できていません。</p><h4 id="追記"><a class="docs-heading-anchor" href="#追記">追記</a><a id="追記-1"></a><a class="docs-heading-anchor-permalink" href="#追記" title="Permalink"></a></h4><p>2020年12月からIntelのFortranコンパイラであるifortが無料で使えるようになっていたようです。<a href="https://qiita.com/implicit_none/items/35bc4be8f2022903747a">こちら</a>を参照してインストールしてみたところ、無事に上のコードをコンパイルできました。なお、Macでやる時には<a href="https://community.intel.com/t5/Intel-Fortran-Compiler/New-macOS-Big-Sur-return-quot-ld-library-not-found-for-lSystem/m-p/1228382/highlight/true?profile.language=ja">こちら</a>にあるように「 -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib」をつける必要があるかもしれません（LIBRARY_PATHにこれを追加しておく）。</p><p>記事によると、このコードは画像をBMP形式で出力してくれるようです。BMPのフォーマットは検索すると出てきましたので、その形式に従ってバイナリを出力する、というコードのようです。</p><p>これのJulia版は</p><pre><code class="language-julia hljs">module M_bmp
+  end program mandel_main</code></pre><p>です。このコードですが、gfortranでコンパイルしようとしても失敗してしまいました。<a href="https://fortran-lang.discourse.group/t/a-gfortran-issue-with-parameterized-derived-types/213">こちら</a>によると、どうやら「Fortran2003 で導入されたパラメータ付派生型(parameterized derived type)」がgfortranがこの機能にフルに対応していないようです。ですので、このコードの実行を確認できていません。</p><h4 id="追記"><a class="docs-heading-anchor" href="#追記">追記</a><a id="追記-1"></a><a class="docs-heading-anchor-permalink" href="#追記" title="Permalink"></a></h4><p>2020年12月からIntelのFortranコンパイラであるifortが無料で使えるようになっていたようです。<a href="https://qiita.com/implicit_none/items/35bc4be8f2022903747a">こちら</a>を参照してインストールしてみたところ、無事に上のコードをコンパイルできました。なお、Macでやる時には<a href="https://community.intel.com/t5/Intel-Fortran-Compiler/New-macOS-Big-Sur-return-quot-ld-library-not-found-for-lSystem/m-p/1228382/highlight/true?profile.language=ja">こちら</a>にあるように「 -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib」をつける必要があるかもしれません（LIBRARY_PATHにこれを追加しておく）。</p><p>記事によると、このコードは画像をBMP形式で出力してくれるようです。BMPのフォーマットは検索すると出てきましたので、その形式に従ってバイナリを出力する、というコードのようです。</p><p>これのJulia版は</p><pre><code class="language-julia">module M_bmp
     export to_rgb,T_bmp,wr_bmp
 
     Base.@kwdef mutable struct T_bmp_file_header
@@ -485,7 +485,7 @@ function mandel_main()
     println(&quot;BMP size:  $nx $ny&quot;)
 end
 
-mandel_main()</code></pre><p>となります。 実行した結果は得られる画像は</p><p><img src="../test.bmp" alt="fig1"/></p><p>となります。</p><p>ポイントは</p><ol><li>Fortran2003のオブジェクト指向によるクラスはJuliaでは<code>mutable struct</code>に。また、クラスのメソッドはJuliaでは多重ディスパッチで定義。</li><li>Fortranでは定義した構造体をそのままバイナリで書き出せたが、Juliaでの独自型は自分で書き出しを指定してやる必要があるため、標準のwriteを多重ディスパッチで機能拡張</li><li>BMP形式の定義によると<code>t_rgb</code>クラスに入れるべきは符号なし整数なので、Juliaでは<code>UInt8</code>型（符号なし8ビット整数）に変更</li><li><code>mutable struct</code>でデフォルトの値を入れるために<code>Base.@kwdef</code>を使用</li><li>Fortranでのパラメータ付派生型と同等の機能をJuliaではパラメトリック型で実装（<code>mutable struct T_bmp{nx,ny}</code>）</li></ol><p>です。オブジェクト指向なコードもすんなりJuliaに移植できました。</p><h3 id="パッケージの利用"><a class="docs-heading-anchor" href="#パッケージの利用">パッケージの利用</a><a id="パッケージの利用-1"></a><a class="docs-heading-anchor-permalink" href="#パッケージの利用" title="Permalink"></a></h3><p>上で書いたJuliaのコードはFortranでBMP形式を扱うように直接バイナリを操作したものでした。Juliaの場合、自前で書かなくても関連するパッケージがあり、簡単に画像データを扱えます。ここではImagesというパッケージを使います。これをインストールするには、</p><pre><code class="nohighlight hljs">julia -e &#39;using Pkg;Pkg.add(&quot;Images&quot;)&#39;</code></pre><p>としてください。 これを使うと、</p><pre><code class="language-julia hljs">module M_mandel
+mandel_main()</code></pre><p>となります。 実行した結果は得られる画像は</p><p><img src="../test.bmp" alt="fig1"/></p><p>となります。</p><p>ポイントは</p><ol><li>Fortran2003のオブジェクト指向によるクラスはJuliaでは<code>mutable struct</code>に。また、クラスのメソッドはJuliaでは多重ディスパッチで定義。</li><li>Fortranでは定義した構造体をそのままバイナリで書き出せたが、Juliaでの独自型は自分で書き出しを指定してやる必要があるため、標準のwriteを多重ディスパッチで機能拡張</li><li>BMP形式の定義によると<code>t_rgb</code>クラスに入れるべきは符号なし整数なので、Juliaでは<code>UInt8</code>型（符号なし8ビット整数）に変更</li><li><code>mutable struct</code>でデフォルトの値を入れるために<code>Base.@kwdef</code>を使用</li><li>Fortranでのパラメータ付派生型と同等の機能をJuliaではパラメトリック型で実装（<code>mutable struct T_bmp{nx,ny}</code>）</li></ol><p>です。オブジェクト指向なコードもすんなりJuliaに移植できました。</p><h3 id="パッケージの利用"><a class="docs-heading-anchor" href="#パッケージの利用">パッケージの利用</a><a id="パッケージの利用-1"></a><a class="docs-heading-anchor-permalink" href="#パッケージの利用" title="Permalink"></a></h3><p>上で書いたJuliaのコードはFortranでBMP形式を扱うように直接バイナリを操作したものでした。Juliaの場合、自前で書かなくても関連するパッケージがあり、簡単に画像データを扱えます。ここではImagesというパッケージを使います。これをインストールするには、</p><pre><code class="language-none">julia -e &#39;using Pkg;Pkg.add(&quot;Images&quot;)&#39;</code></pre><p>としてください。 これを使うと、</p><pre><code class="language-julia">module M_mandel
     const maxiter = 254
     export mandel,maxiter
 
@@ -520,7 +520,7 @@ function mandel_main()
 
     println(&quot;BMP size:  $nx $ny&quot;)
 end
-mandel_main()</code></pre><p>とすれば、BMP形式とPNG形式のグレースケールの画像を出力できます。</p><p>ここでの追加のポイントとしては</p><ol><li>グレースケール画像は0から1の範囲なので、255で割っている。</li><li>行列を可視化するような形に出力されるため、デフォルトではxが下方向、yが右方向になっている。これを変更するために、<code>img</code>を<code>&#39;</code>で転置した。</li></ol><p>です。Fortranと異なりJuliaはモダンな言語ですから、画像や動画の扱いが容易です。</p><h2 id="万有引力に従う天体の運動"><a class="docs-heading-anchor" href="#万有引力に従う天体の運動">万有引力に従う天体の運動</a><a id="万有引力に従う天体の運動-1"></a><a class="docs-heading-anchor-permalink" href="#万有引力に従う天体の運動" title="Permalink"></a></h2><p>こちらの<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/memo.html">サイト</a>では、万有引力に従う粒子の運動の解説とFortranコードの説明があります。ここにあるFortranコードをJuliaに移植してみることにします。</p><h3 id="基本方程式"><a class="docs-heading-anchor" href="#基本方程式">基本方程式</a><a id="基本方程式-1"></a><a class="docs-heading-anchor-permalink" href="#基本方程式" title="Permalink"></a></h3><p>二つの物体の間には物体の質量に比例しその距離の二乗に反比例する引力（万有引力）</p><p class="math-container">\[F = - G \frac{Mm}{r^2}\]</p><p>が働きます。この力があるため、太陽の周りを地球などが回っているわけです。これをコードで示すことにします。</p><p>無次元化された運動方程式を</p><p class="math-container">\[\dot{x} = u, \dot{u} = - \frac{x}{|{\bm r}|^3}\]</p><p class="math-container">\[\dot{y} = v, \dot{v} = - \frac{y}{|{\bm r}|^3}\]</p><p>として、天体の動きを追いかけることとします。なお、簡単のためz方向には天体を固定し動かないこととしました。</p><p>方程式の時間発展にはいくつかの方法があります。微分方程式が</p><p class="math-container">\[\dot{x} = u, \dot{u} = \Phi(x)\]</p><p>と書ける時の時間発展法について述べます。方程式のエネルギーを保存させるためにはシンプレクティック解法と呼ばれる手法を用いる必要がありまして、ここではLeap-frog法とVelocity Verlet法を紹介します。</p><p><em>Leap-frog法</em></p><p class="math-container">\[u(t + \Delta t/2) = u(t - \Delta/2) + \Phi(x) \Delta t\]</p><p class="math-container">\[x(t + \Delta t) = x(t) + u(t + \Delta t/2) \Delta t\]</p><p>という形になりまして、<span>$\Delta/2$</span>だけ速度uを動かしてからxを更新します。tでの速度は</p><p class="math-container">\[u(t) = (u(t - \Delta/2) + u(t + \Delta/2))/2\]</p><p>と計算できます。最初のステップでは<span>$\Delta(-\Delta t/2)$</span>での値が必要ですので、これは方程式を逆に解いて</p><p class="math-container">\[\Delta(-\Delta t/2) = u(0) - \Phi(x) \Delta /2\]</p><p>とします。</p><p><em>Velocity Verlet法</em></p><p>Velocity Verlet法の場合には、</p><p class="math-container">\[x(t + \Delta t) = x(t) + u(t) \Delta t + \Phi(x) \frac{(\Delta t)^2}{2}\]</p><p class="math-container">\[u(t + \Delta t) = u(t) + (\Phi(x(t)) + \Phi(x(t+\Delta t))) \frac{\Delta t}{2}\]</p><p>とします。</p><h3 id="Leap-frog法による二体問題"><a class="docs-heading-anchor" href="#Leap-frog法による二体問題">Leap-frog法による二体問題</a><a id="Leap-frog法による二体問題-1"></a><a class="docs-heading-anchor-permalink" href="#Leap-frog法による二体問題" title="Permalink"></a></h3><p>Fortranで書かれたソースコードは<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/particle_sim/14energy_conservation.html">こちら</a>にあります。ここにあるコードをJuliaに移植してみました。</p><p>コードは</p><pre><code class="language-julia hljs">
+mandel_main()</code></pre><p>とすれば、BMP形式とPNG形式のグレースケールの画像を出力できます。</p><p>ここでの追加のポイントとしては</p><ol><li>グレースケール画像は0から1の範囲なので、255で割っている。</li><li>行列を可視化するような形に出力されるため、デフォルトではxが下方向、yが右方向になっている。これを変更するために、<code>img</code>を<code>&#39;</code>で転置した。</li></ol><p>です。Fortranと異なりJuliaはモダンな言語ですから、画像や動画の扱いが容易です。</p><h2 id="万有引力に従う天体の運動"><a class="docs-heading-anchor" href="#万有引力に従う天体の運動">万有引力に従う天体の運動</a><a id="万有引力に従う天体の運動-1"></a><a class="docs-heading-anchor-permalink" href="#万有引力に従う天体の運動" title="Permalink"></a></h2><p>こちらの<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/memo.html">サイト</a>では、万有引力に従う粒子の運動の解説とFortranコードの説明があります。ここにあるFortranコードをJuliaに移植してみることにします。</p><h3 id="基本方程式"><a class="docs-heading-anchor" href="#基本方程式">基本方程式</a><a id="基本方程式-1"></a><a class="docs-heading-anchor-permalink" href="#基本方程式" title="Permalink"></a></h3><p>二つの物体の間には物体の質量に比例しその距離の二乗に反比例する引力（万有引力）</p><p class="math-container">\[F = - G \frac{Mm}{r^2}\]</p><p>が働きます。この力があるため、太陽の周りを地球などが回っているわけです。これをコードで示すことにします。</p><p>無次元化された運動方程式を</p><p class="math-container">\[\dot{x} = u, \dot{u} = - \frac{x}{|{\bm r}|^3}\]</p><p class="math-container">\[\dot{y} = v, \dot{v} = - \frac{y}{|{\bm r}|^3}\]</p><p>として、天体の動きを追いかけることとします。なお、簡単のためz方向には天体を固定し動かないこととしました。</p><p>方程式の時間発展にはいくつかの方法があります。微分方程式が</p><p class="math-container">\[\dot{x} = u, \dot{u} = \Phi(x)\]</p><p>と書ける時の時間発展法について述べます。方程式のエネルギーを保存させるためにはシンプレクティック解法と呼ばれる手法を用いる必要がありまして、ここではLeap-frog法とVelocity Verlet法を紹介します。</p><p><em>Leap-frog法</em></p><p class="math-container">\[u(t + \Delta t/2) = u(t - \Delta/2) + \Phi(x) \Delta t\]</p><p class="math-container">\[x(t + \Delta t) = x(t) + u(t + \Delta t/2) \Delta t\]</p><p>という形になりまして、<span>$\Delta/2$</span>だけ速度uを動かしてからxを更新します。tでの速度は</p><p class="math-container">\[u(t) = (u(t - \Delta/2) + u(t + \Delta/2))/2\]</p><p>と計算できます。最初のステップでは<span>$\Delta(-\Delta t/2)$</span>での値が必要ですので、これは方程式を逆に解いて</p><p class="math-container">\[\Delta(-\Delta t/2) = u(0) - \Phi(x) \Delta /2\]</p><p>とします。</p><p><em>Velocity Verlet法</em></p><p>Velocity Verlet法の場合には、</p><p class="math-container">\[x(t + \Delta t) = x(t) + u(t) \Delta t + \Phi(x) \frac{(\Delta t)^2}{2}\]</p><p class="math-container">\[u(t + \Delta t) = u(t) + (\Phi(x(t)) + \Phi(x(t+\Delta t))) \frac{\Delta t}{2}\]</p><p>とします。</p><h3 id="Leap-frog法による二体問題"><a class="docs-heading-anchor" href="#Leap-frog法による二体問題">Leap-frog法による二体問題</a><a id="Leap-frog法による二体問題-1"></a><a class="docs-heading-anchor-permalink" href="#Leap-frog法による二体問題" title="Permalink"></a></h3><p>Fortranで書かれたソースコードは<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/particle_sim/14energy_conservation.html">こちら</a>にあります。ここにあるコードをJuliaに移植してみました。</p><p>コードは</p><pre><code class="language-julia">
 module Subfunc
     export fx,fu,fy,fv
     function fx(u,v)
@@ -607,7 +607,7 @@ function celestial()
 
 
 end
-@time celestial()</code></pre><p>となります。リンク先のFortranコードを忠実に変換した形になっているかと思います。計算速度もほぼ同じになっているのが確認できると思います。</p><h3 id="Velocity-Verlet法によるN体問題"><a class="docs-heading-anchor" href="#Velocity-Verlet法によるN体問題">Velocity Verlet法によるN体問題</a><a id="Velocity-Verlet法によるN体問題-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-Verlet法によるN体問題" title="Permalink"></a></h3><p>次に、N体問題を解いてみます。こちらの<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/particle_sim/15many_body.html">ページ</a>を参考にしています。 複数の粒子がある場合は万有引力はそれぞれの粒子から受けますので、</p><p class="math-container">\[F({\bm x}_i) = - G \sum_{j} \frac{m_i m_j}{|{\bm r}_i - {\bm r}_j|^2}\]</p><p>となります。</p><p>それでは、太陽、地球、金星、火星、そして月の5つの天体が存在する場合の軌道を調べてみましょう。そのFortran版のコードは<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/particle_sim/15many_body.html">こちら</a>にあります。 このコードを手元のPCでコンパイルし、実行しますと、</p><pre><code class="nohighlight hljs"> current step:      100000 /total step:     1000000
+@time celestial()</code></pre><p>となります。リンク先のFortranコードを忠実に変換した形になっているかと思います。計算速度もほぼ同じになっているのが確認できると思います。</p><h3 id="Velocity-Verlet法によるN体問題"><a class="docs-heading-anchor" href="#Velocity-Verlet法によるN体問題">Velocity Verlet法によるN体問題</a><a id="Velocity-Verlet法によるN体問題-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-Verlet法によるN体問題" title="Permalink"></a></h3><p>次に、N体問題を解いてみます。こちらの<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/particle_sim/15many_body.html">ページ</a>を参考にしています。 複数の粒子がある場合は万有引力はそれぞれの粒子から受けますので、</p><p class="math-container">\[F({\bm x}_i) = - G \sum_{j} \frac{m_i m_j}{|{\bm r}_i - {\bm r}_j|^2}\]</p><p>となります。</p><p>それでは、太陽、地球、金星、火星、そして月の5つの天体が存在する場合の軌道を調べてみましょう。そのFortran版のコードは<a href="http://www2.kaiyodai.ac.jp/~kentaro/materials/new_HP/particle_sim/15many_body.html">こちら</a>にあります。 このコードを手元のPCでコンパイルし、実行しますと、</p><pre><code class="language-none"> current step:      100000 /total step:     1000000
  current step:      200000 /total step:     1000000
  current step:      300000 /total step:     1000000
  current step:      400000 /total step:     1000000
@@ -618,7 +618,7 @@ end
  current step:      900000 /total step:     1000000
  Time step:   6.3717374890228697E-005
  Average error of energy update:   1.0575727271732502E-021
- CPU time:  0.38528799999999996  </code></pre><p>という結果が得られました。約0.4秒で実行が終わっていますね。このコードを素朴にJuliaのコードにしたものが</p><pre><code class="language-julia hljs">module Globals
+ CPU time:  0.38528799999999996  </code></pre><p>という結果が得られました。約0.4秒で実行が終わっていますね。このコードを素朴にJuliaのコードにしたものが</p><pre><code class="language-julia">module Globals
     export G,ndim,nbody
     const G = 6.67384e-11
     const ndim = 2
@@ -846,7 +846,7 @@ function celestial()
     println(&quot;Time step: &quot;,dt)
     println(&quot;Average error of energy update: &quot;,sum_dE/n)
 end
-@time celestial()</code></pre><p>こちらです。なるべく元のコードと同じ形になるように移植しました。 このコードのポイントは</p><ol><li>Fortranでのmoduleを用いた「グローバル変数」のような扱い（ここでは<code>mass</code>等）を、全て独自型としてまとめて引数に入れるようにした</li><li>1.を行った結果<code>var_trajectory.mass</code>のように変数名が長くなってしまったので、<code>mass = var_trajectory.mass</code>のように参照用の変数を導入した。このようにすると<code>mass</code>の中身を書き換えたときに<code>var_trajectory.mass</code>も書き換わる。<code>veloc = var_trajectory.veloc</code>や<code>coord = var_trajectory.coord</code>も同様</li><li>配列の要素にまとめて入れるために<code>@.</code>マクロを使用した。<code>@. var_trajectory.coord = coord/cnor</code>などで使用</li></ol><p>となります。このコードですが、同じPCで実行すると、</p><pre><code class="nohighlight hljs">current step: 100000,/total step: 1000000
+@time celestial()</code></pre><p>こちらです。なるべく元のコードと同じ形になるように移植しました。 このコードのポイントは</p><ol><li>Fortranでのmoduleを用いた「グローバル変数」のような扱い（ここでは<code>mass</code>等）を、全て独自型としてまとめて引数に入れるようにした</li><li>1.を行った結果<code>var_trajectory.mass</code>のように変数名が長くなってしまったので、<code>mass = var_trajectory.mass</code>のように参照用の変数を導入した。このようにすると<code>mass</code>の中身を書き換えたときに<code>var_trajectory.mass</code>も書き換わる。<code>veloc = var_trajectory.veloc</code>や<code>coord = var_trajectory.coord</code>も同様</li><li>配列の要素にまとめて入れるために<code>@.</code>マクロを使用した。<code>@. var_trajectory.coord = coord/cnor</code>などで使用</li></ol><p>となります。このコードですが、同じPCで実行すると、</p><pre><code class="language-none">current step: 100000,/total step: 1000000
 current step: 200000,/total step: 1000000
 current step: 300000,/total step: 1000000
 current step: 400000,/total step: 1000000
@@ -857,9 +857,9 @@ current step: 800000,/total step: 1000000
 current step: 900000,/total step: 1000000
 Time step: 6.37173748902287e-5
 Average error of energy update: 1.0575727271732502e-21
-  5.327849 seconds (134.88 M allocations: 12.121 GiB, 4.46% gc time, 3.86% compilation time)</code></pre><p>となり、&quot;Average error of energy update&quot;は倍精度の範囲で結果が一致していることがわかります。ただし、計算時間が5.3秒もかかってしまっていて遅いです。</p><p>これを高速化する方法は簡単です。メモリーアロケーションが<code>134.88 M allocations</code>となっていますから、これは不必要なメモリ確保が沢山生じていることを意味しています。どこにそれがあるかをみてみますと、</p><pre><code class="language-julia hljs">rij[:] = c[:,j]-c[:,i]</code></pre><p>などです。右辺の<code>c[:,j]</code>は行列でいうところの1列だけを取り出しています。Juliaでは<code>:</code>を右辺で使って配列の一部範囲を取り出す場合、配列のコピーが発生してしまいます。これを避けるには<code>@view</code>というマクロを使うか、素朴に</p><pre><code class="language-julia hljs">for k=1:length(rij) 
+  5.327849 seconds (134.88 M allocations: 12.121 GiB, 4.46% gc time, 3.86% compilation time)</code></pre><p>となり、&quot;Average error of energy update&quot;は倍精度の範囲で結果が一致していることがわかります。ただし、計算時間が5.3秒もかかってしまっていて遅いです。</p><p>これを高速化する方法は簡単です。メモリーアロケーションが<code>134.88 M allocations</code>となっていますから、これは不必要なメモリ確保が沢山生じていることを意味しています。どこにそれがあるかをみてみますと、</p><pre><code class="language-julia">rij[:] = c[:,j]-c[:,i]</code></pre><p>などです。右辺の<code>c[:,j]</code>は行列でいうところの1列だけを取り出しています。Juliaでは<code>:</code>を右辺で使って配列の一部範囲を取り出す場合、配列のコピーが発生してしまいます。これを避けるには<code>@view</code>というマクロを使うか、素朴に</p><pre><code class="language-julia">for k=1:length(rij) 
   rij[k] = c[k,j]-c[k,i]
-end</code></pre><p>のようにループするかです。ループの方がシンプルなので、複数の該当箇所をループに置き換えてみると、</p><pre><code class="language-julia hljs">module Globals
+end</code></pre><p>のようにループするかです。ループの方がシンプルなので、複数の該当箇所をループに置き換えてみると、</p><pre><code class="language-julia">module Globals
     export G,ndim,nbody
     const G = 6.67384e-11
     const ndim = 2
@@ -1095,7 +1095,7 @@ function celestial()
     println(&quot;Time step: &quot;,dt)
     println(&quot;Average error of energy update: &quot;,sum_dE/n)
 end
-@time celestial()</code></pre><p>となります。 この実行結果は、</p><pre><code class="nohighlight hljs">current step: 100000,/total step: 1000000
+@time celestial()</code></pre><p>となります。 この実行結果は、</p><pre><code class="language-none">current step: 100000,/total step: 1000000
 current step: 200000,/total step: 1000000
 current step: 300000,/total step: 1000000
 current step: 400000,/total step: 1000000
@@ -1106,8 +1106,8 @@ current step: 800000,/total step: 1000000
 current step: 900000,/total step: 1000000
 Time step: 6.37173748902287e-5
 Average error of energy update: 1.0575727271732502e-21
-  0.700156 seconds (4.88 M allocations: 509.987 MiB, 12.72% gc time, 30.04% compilation time)</code></pre><p>となり、計算速度がFortranとほぼ同じオーダーとなります。さらに、今は<code>@time</code>で測定していますが、1回目はコードの最適化の時間が含まれてしまいます。ですので</p><pre><code class="language-julia hljs">@time celestial()
-@time celestial()</code></pre><p>と二回実行してみますと、</p><pre><code class="nohighlight hljs">current step: 100000,/total step: 1000000
+  0.700156 seconds (4.88 M allocations: 509.987 MiB, 12.72% gc time, 30.04% compilation time)</code></pre><p>となり、計算速度がFortranとほぼ同じオーダーとなります。さらに、今は<code>@time</code>で測定していますが、1回目はコードの最適化の時間が含まれてしまいます。ですので</p><pre><code class="language-julia">@time celestial()
+@time celestial()</code></pre><p>と二回実行してみますと、</p><pre><code class="language-none">current step: 100000,/total step: 1000000
 current step: 200000,/total step: 1000000
 current step: 300000,/total step: 1000000
 current step: 400000,/total step: 1000000
@@ -1130,12 +1130,12 @@ current step: 800000,/total step: 1000000
 current step: 900000,/total step: 1000000
 Time step: 6.37173748902287e-5
 Average error of energy update: 1.0575727271732502e-21
-  0.365792 seconds (4.42 M allocations: 486.000 MiB, 2.28% gc time)</code></pre><p>となり、二回目はFortranとほぼ同じスピードとなっていることがわかります。</p><h3 id="Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版"><a class="docs-heading-anchor" href="#Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版">Velocity Verlet法によるN体問題: Juliaっぽい書き方版</a><a id="Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版" title="Permalink"></a></h3><p>上で述べたコードはFortranコードを移植したものですから、すごく「Fortranっぽい」コードになっています。これを「Juliaっぽい」ものに書き換えてみようと思います。</p><p>まず、天体の情報を格納するstructを作りましょう。</p><pre><code class="language-julia hljs">    struct Body
+  0.365792 seconds (4.42 M allocations: 486.000 MiB, 2.28% gc time)</code></pre><p>となり、二回目はFortranとほぼ同じスピードとなっていることがわかります。</p><h3 id="Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版"><a class="docs-heading-anchor" href="#Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版">Velocity Verlet法によるN体問題: Juliaっぽい書き方版</a><a id="Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-Verlet法によるN体問題:-Juliaっぽい書き方版" title="Permalink"></a></h3><p>上で述べたコードはFortranコードを移植したものですから、すごく「Fortranっぽい」コードになっています。これを「Juliaっぽい」ものに書き換えてみようと思います。</p><p>まず、天体の情報を格納するstructを作りましょう。</p><pre><code class="language-julia">    struct Body
         r::Array{Float64,1}
         v::Array{Float64,1}
         mass::Float64
         f::Array{Float64,1}
-    end</code></pre><p>位置、速度、質量、そして力を格納します。 次に、天体たちの情報を格納するstructを作ります。</p><pre><code class="language-julia hljs">    mutable struct Many_bodies
+    end</code></pre><p>位置、速度、質量、そして力を格納します。 次に、天体たちの情報を格納するstructを作ります。</p><pre><code class="language-julia">    mutable struct Many_bodies
         bodies::Array{Body,1}
         ndim::Int64
         nbody::Int64
@@ -1155,9 +1155,9 @@ Average error of energy update: 1.0575727271732502e-21
             fij_temp = zero(r)
             return new(bodies,ndim,nbody,rij_temp,fij_temp)
         end
-    end</code></pre><p>ここで、<code>bodies::Array{Body,1}</code>は、上で定義した<code>Body</code>型を要素に持つ配列です。<code>Many_bodies(ndim,nbody,mass)</code>はコンストラクタで、中身を初期化しています。つまり、引数が三つの関数<code>Many_bodies(ndim,nbody,mass)</code>を呼ぶことで、中身を指定しています。</p><p>次に、<code>Many_bodies</code>型からそれぞれの天体の情報を取り出すために</p><pre><code class="language-julia hljs">    function Base.getindex(manybodies::Many_bodies,i)
+    end</code></pre><p>ここで、<code>bodies::Array{Body,1}</code>は、上で定義した<code>Body</code>型を要素に持つ配列です。<code>Many_bodies(ndim,nbody,mass)</code>はコンストラクタで、中身を初期化しています。つまり、引数が三つの関数<code>Many_bodies(ndim,nbody,mass)</code>を呼ぶことで、中身を指定しています。</p><p>次に、<code>Many_bodies</code>型からそれぞれの天体の情報を取り出すために</p><pre><code class="language-julia">    function Base.getindex(manybodies::Many_bodies,i)
         return manybodies.bodies[i]
-    end</code></pre><p>を定義します。これは、<code>manybodies[i]</code>と<code>manybodies</code>を配列のように考えてその要素<code>i</code>を呼び出そうとするとどういう挙動をするのか、ということを決めています。引数が<code>manybodies::Many_bodies</code>となっているのは、引数が<code>Many_bodies</code>型の時のみこの関数を呼ぶ、ということを指定しています。このように型ごとに関数を定義することで、オブジェクト指向プログラミングのような自由度を得ることができています。</p><p>さて、上のようなパーツを組み合わせてコードを作ります。その結果、</p><pre><code class="language-julia hljs">module Nbodys
+    end</code></pre><p>を定義します。これは、<code>manybodies[i]</code>と<code>manybodies</code>を配列のように考えてその要素<code>i</code>を呼び出そうとするとどういう挙動をするのか、ということを決めています。引数が<code>manybodies::Many_bodies</code>となっているのは、引数が<code>Many_bodies</code>型の時のみこの関数を呼ぶ、ということを指定しています。このように型ごとに関数を定義することで、オブジェクト指向プログラミングのような自由度を得ることができています。</p><p>さて、上のようなパーツを組み合わせてコードを作ります。その結果、</p><pre><code class="language-julia">module Nbodys
     export G,Many_bodies,Body
     const G = 6.67384e-11
 
@@ -1409,7 +1409,7 @@ end
 
 @time celestial()
 @time celestial()
-</code></pre><p>となりました。そして、実行すると、</p><pre><code class="nohighlight hljs">current step: 100000,/total step: 1000000
+</code></pre><p>となりました。そして、実行すると、</p><pre><code class="language-none">current step: 100000,/total step: 1000000
 current step: 200000,/total step: 1000000
 current step: 300000,/total step: 1000000
 current step: 400000,/total step: 1000000
@@ -1432,7 +1432,7 @@ current step: 800000,/total step: 1000000
 current step: 900000,/total step: 1000000
 Time step: 6.37173748902287e-5
 Average error of energy update: 1.0582096959495853e-21
-  0.353715 seconds (390.21 k allocations: 55.551 MiB, 0.81% gc time)</code></pre><p>となり、以前のコードより若干良いパフォーマンスを持つコードとなりました。</p><h3 id="Velocity-Verlet法によるN体問題:-さらに早く"><a class="docs-heading-anchor" href="#Velocity-Verlet法によるN体問題:-さらに早く">Velocity Verlet法によるN体問題: さらに早く</a><a id="Velocity-Verlet法によるN体問題:-さらに早く-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-Verlet法によるN体問題:-さらに早く" title="Permalink"></a></h3><p>上のコードは実はさらに高速化することができます。というのは、forループでndimやnbodyでループをしていますが、これは計算の最初に決まる数なので、定数になった方がコンパイラがうまく最適化してくれるからです。これを行うには、<code>Many_bodies</code>をパラメトリック型<code>Many_bodies{ndim,nbody}</code>にします。パラメトリック型はこの型を宣言したときにndimとnbodyの値をパラメータとして取り込むことができます。これによって、Juliaはndimとnbodyをパラメータとして扱うことができ、高速化のためのループのアンローリングなどが可能となります。</p><pre><code class="language-julia hljs">
+  0.353715 seconds (390.21 k allocations: 55.551 MiB, 0.81% gc time)</code></pre><p>となり、以前のコードより若干良いパフォーマンスを持つコードとなりました。</p><h3 id="Velocity-Verlet法によるN体問題:-さらに早く"><a class="docs-heading-anchor" href="#Velocity-Verlet法によるN体問題:-さらに早く">Velocity Verlet法によるN体問題: さらに早く</a><a id="Velocity-Verlet法によるN体問題:-さらに早く-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-Verlet法によるN体問題:-さらに早く" title="Permalink"></a></h3><p>上のコードは実はさらに高速化することができます。というのは、forループでndimやnbodyでループをしていますが、これは計算の最初に決まる数なので、定数になった方がコンパイラがうまく最適化してくれるからです。これを行うには、<code>Many_bodies</code>をパラメトリック型<code>Many_bodies{ndim,nbody}</code>にします。パラメトリック型はこの型を宣言したときにndimとnbodyの値をパラメータとして取り込むことができます。これによって、Juliaはndimとnbodyをパラメータとして扱うことができ、高速化のためのループのアンローリングなどが可能となります。</p><pre><code class="language-julia">
     mutable struct Many_bodies{ndim,nbody}
         bodies::Array{Body,1}
         rij_temp::Array{Float64,1}
@@ -1451,7 +1451,7 @@ Average error of energy update: 1.0582096959495853e-21
             fij_temp = zero(r)
             return new{ndim,nbody}(bodies,rij_temp,fij_temp)
         end
-    end</code></pre><p>この型を使ったコードは以下の通りです。</p><pre><code class="language-julia hljs">module Nbodys
+    end</code></pre><p>この型を使ったコードは以下の通りです。</p><pre><code class="language-julia">module Nbodys
     export G,Many_bodies,Body
     const G = 6.67384e-11
 
@@ -1704,7 +1704,7 @@ end
 
 @time celestial()
 @time celestial()
-</code></pre><p>コードは型の宣言<code>manybodies = Many_bodies{ndim,nbody}(mass)</code>以外はndimとnbodyまわり以外全く変えていません。これだけの変更ですが、このコードを実行すると、</p><pre><code class="nohighlight hljs">current step: 100000,/total step: 1000000
+</code></pre><p>コードは型の宣言<code>manybodies = Many_bodies{ndim,nbody}(mass)</code>以外はndimとnbodyまわり以外全く変えていません。これだけの変更ですが、このコードを実行すると、</p><pre><code class="language-none">current step: 100000,/total step: 1000000
 current step: 200000,/total step: 1000000
 current step: 300000,/total step: 1000000
 current step: 400000,/total step: 1000000
@@ -1727,7 +1727,7 @@ current step: 800000,/total step: 1000000
 current step: 900000,/total step: 1000000
 Time step: 6.37173748902287e-5
 Average error of energy update: 1.0582096959495853e-21
-  0.315212 seconds (390.21 k allocations: 55.551 MiB, 0.99% gc time)</code></pre><p>となり、少し高速化します。これでgfortranの最適化オプションなしよりは速くなりました。</p><p>なお、gfortranのO3オプションをつけた場合の結果は</p><pre><code class="nohighlight hljs"> current step:      100000 /total step:     1000000
+  0.315212 seconds (390.21 k allocations: 55.551 MiB, 0.99% gc time)</code></pre><p>となり、少し高速化します。これでgfortranの最適化オプションなしよりは速くなりました。</p><p>なお、gfortranのO3オプションをつけた場合の結果は</p><pre><code class="language-none"> current step:      100000 /total step:     1000000
  current step:      200000 /total step:     1000000
  current step:      300000 /total step:     1000000
  current step:      400000 /total step:     1000000
@@ -1738,4 +1738,242 @@ Average error of energy update: 1.0582096959495853e-21
  current step:      900000 /total step:     1000000
  Time step:   6.3717374890228697E-005
  Average error of energy update:   1.0521106352128808E-021
- CPU time:  0.16022700000000001   </code></pre><p>ですので、まだ負けています。現在、Juliaのコードをさらに高速化する方法について試行錯誤しています。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><a class="docs-footer-nextpage" href="../02/">FortranでできることをJuliaでやってみる »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Thursday 26 August 2021 15:55">Thursday 26 August 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+ CPU time:  0.16022700000000001   </code></pre><p>ですので、まだ負けています。現在、Juliaのコードをさらに高速化する方法について試行錯誤しています。</p><h2 id="次元Ising模型"><a class="docs-heading-anchor" href="#次元Ising模型">2次元Ising模型</a><a id="次元Ising模型-1"></a><a class="docs-heading-anchor-permalink" href="#次元Ising模型" title="Permalink"></a></h2><p>次は、2次元Ising模型のFORTRAN77コードをJuliaに移植してみましょう。</p><h3 id="理論的背景"><a class="docs-heading-anchor" href="#理論的背景">理論的背景</a><a id="理論的背景-1"></a><a class="docs-heading-anchor-permalink" href="#理論的背景" title="Permalink"></a></h3><p><em>2次元Ising模型</em></p><p>古典スピン系であるIsing(イジング)模型のハミルトニアンは</p><p class="math-container">\[H = -J \sum_{\langle i j \rangle} \sigma_i \sigma_j - h \sum_i \sigma_i\]</p><p>です。第二項は磁場の効果です。ここで、<span>$\langle i j \rangle$</span>は、最隣接格子点のみで和を取ることを意味していて、一次元系であれば、<span>$j=i+1$</span>などです。<span>$\sigma_i$</span>は<span>$i$</span>番目の格子点のスピンを表し、<span>$+1$</span>か<span>$-1$</span>を取ります。  統計力学において、物理量<span>$A$</span>の期待値は</p><p class="math-container">\[\langle A \rangle = \frac{1}{Z} \sum_{\cal C} \left[ \exp \left( -\frac{H({\cal C})}{k_{\rm B} T} \right) A({\cal C}) \right]\]</p><p>と書けます。ここで、<span>$H({\cal C})$</span>は、あるスピン配置<span>${\cal C}$</span>でのハミルトニアン、<span>$A({\cal C})$</span>はその時の物理量<span>$A$</span>の値です。 <span>$k_{\rm B}$</span>はボルツマン定数、<span>$T$</span>は温度です。 <span>$Z$</span>は分配関数であり、 $ Z = \sum<em>{\cal C}\exp \left( -\frac{H({\cal C})}{k</em>{\rm B} T} \right) $ と定義されています。 つまり、すべての可能なスピン配置に関して和を取れば、物理量が計算できます。 すべての可能なスピン配置の数<span>${\cal N}$</span>は、<span>$N$</span>個の格子点を持つ系の場合、各サイトで<span>$-1$</span>か<span>$1$</span>の二通りの状態を取れるので、</p><p class="math-container">\[{\cal N} = 2^N\]</p><p>です。</p><p class="math-container">\[L_x \times L_y\]</p><p>の正方格子の2次元Ising模型を考えてみましょう。この時、あるサイトを<span>${\bf i} = (i_x,i_y)$</span>とすると、その最近接格子は、</p><p class="math-container">\[{\bf d}_1 = (i_x+1,i_y),{\bf d}_2 = (i_x-1,i_y),{\bf d}_3 = (i_x,i_y+1), {\bf d}_4 = (i_x,i_y-1)\]</p><p>の4点です。この時、Ising模型は</p><p class="math-container">\[H = -\frac{J}{2} \sum_{\bf i}^{L_x L_y} \sum_{l=1}^4 \sigma_{\bf i} \sigma_{{\bf i} + {\bf d}_l}- h \sum_{\bf i} \sigma_{\bf i}\]</p><p>となります。ここで、本来一つしかない<span>$\sigma_1 \sigma_2$</span>を<span>$\sigma_1 \sigma_2 = (\sigma_1 \sigma_2 + \sigma_2 \sigma_1)/2$</span>と分離したため、<span>$1/2$</span>の因子が先頭につきました。 そしてこれは、</p><p class="math-container">\[H = -\frac{J}{2} \sum_{\bf i}^{L_x L_y} \sigma_{\bf i} \sum_{l=1}^4 \sigma_{{\bf i} + {\bf d}_l}- h \sum_{\bf i} \sigma_{\bf i}\]</p><p class="math-container">\[= -\frac{J}{2} \sum_{\bf i}^{L_x L_y} \sigma_{\bf i} S_i - h \sum_{\bf i} \sigma_{\bf i}\]</p><p class="math-container">\[S_i = \sum_{l=1}^4 \sigma_{{\bf i} + {\bf d}_l}\]</p><p>と書くことができます。よって、あるサイト<span>${\bf i}$</span>の隣接格子点におけるスピンの和<span>$S_i$</span>がそれぞれわかれば、全エネルギー<span>$H$</span>を計算できます。 あるサイト<span>${\bf i}$</span>の一つのスピンをフリップ<span>$(\sigma_{\bf i} \rightarrow -\sigma_{\bf i})$</span>した時、そのエネルギー差<span>$\Delta E$</span>は</p><p class="math-container">\[\Delta E = 2J \sigma_{\bf i} S_i+ 2h  \sigma_{\bf i}\]</p><p>となります。</p><p><em>メトロポリス法</em></p><p>あるサイトをランダムに選び、そのスピンをフリップさせることでスピン配置を更新するとします。この時、全サイト数を<span>$N = L_x \times L_y$</span>とすると、確率<span>$1/N$</span>でサイト数を選ぶ。そして、このようなスピンフリップであればプロセスは対称であるので、メトロポリス法でのある配置<span>$C_i$</span>から<span>$C_j$</span>への採択率は</p><p class="math-container">\[A(C_i \rightarrow C_j)  = {\rm min} \left(1, \frac{P(C_j)}{P(C_i)}\right)\]</p><p>となります。ここで、<span>$P(C_i)$</span>をボルツマン重み</p><p class="math-container">\[P(C_i) = \exp \left( -\frac{H({\cal C}_i)}{k_{\rm B} T} \right)\]</p><p>と選べば、物理量を重みつきモンテカルロ法で計算できます。 スピン配置<span>${\cal C}_k$</span>のあるサイト<span>${\bf i}$</span>のスピン<span>$\sigma_{\bf i}$</span>をフリップさせスピン配置<span>${\cal C}_k&#39;$</span>とする時、採択率に現れる重みの比は</p><p class="math-container">\[\frac{P(C_k&#39;)}{P(C_k)} = \exp \left( -\frac{(H({\cal C}_k)-H({\cal C}_k&#39;))}{k_{\rm B} T} \right)\]</p><p class="math-container">\[= \exp \left( -\frac{\Delta E({\cal C}_k,{\bf i})}{k_{\rm B} T}\right)\]</p><p>となります。  </p><h3 id="FORTRAN77コード"><a class="docs-heading-anchor" href="#FORTRAN77コード">FORTRAN77コード</a><a id="FORTRAN77コード-1"></a><a class="docs-heading-anchor-permalink" href="#FORTRAN77コード" title="Permalink"></a></h3><p><a href="https://www.kinokuniya.co.jp/f/dsg-01-9784842702452">G. パリージ、場の理論―統計論的アプローチ（吉岡書店）1993</a>の20章には、2次元Ising模型のモンテカルロシミュレーションコードが記載されています。原著の出版年は1988年ですから、このコードはFortran90ではなく、FORTRAN77で書かれています。 このコードを丸写ししても現代のFortranコンパイラではうまく動きません(RAN関数の動作がおかしい)。ですので、2021年のgfortranでも動くようにコードを少し手直ししました。手直しして動くようになったコードがこちらです(微修正に過ぎませんので、教科書の元のコードの引用になるかと思います)。</p><pre><code class="language-fortran">      PARAMETER maximal_side=100
+      INTEGER forward(maximal_side),backward(maximal_side)
+      COMMON /boundaries/ forward,backward
+      INTEGER side,spin(maximal_side,maximal_side)
+      INTEGER random_seed
+      REAL magnetic_field,magnetization_density
+      CALL read_input(side,number_of_iterations,beta,magnetic_field)
+      CALL get_random_seed(random_seed)
+      call srand(random_seed)
+      CALL compute_backward_and_forward(side)
+      CALL set_spin_to_1(spin,side)
+      DO 1 iteration=1,number_of_iterations
+        CALL one_Monte_Carlo_cycle(spin,side,random_seed,
+     1  beta,magnetic_field,energy_density,magnetization_density)
+        CALL write_output(iteration,energy_density,magnetization_
+     1  density)
+1     CONTINUE
+      END
+
+      SUBROUTINE compute_backward_and_forward(side)
+      PARAMETER maximal_side=100
+      INTEGER forward(maximal_side),backward(maximal_side)
+      COMMON /boundaries/ forward,backward
+      INTEGER position,side
+      DO 1 position=1,side
+        forward(position)=MOD(position,side)+1
+        backward(position)=MOD((position-2+side),side)+1
+1     CONTINUE
+      RETURN
+      END
+
+      SUBROUTINE set_spin_to_1(spin,side)
+      PARAMETER maximal_side=100
+      INTEGER side,spin(maximal_side,maximal_side)
+      INTEGER x_position,y_position
+
+      DO 1 x_position=1,side
+        DO 2 y_position=1,side
+            spin(x_position,y_position)=1
+2       CONTINUE
+1     CONTINUE
+      RETURN
+      END
+
+      SUBROUTINE one_Monte_Carlo_cycle(spin,side,random_seed,
+     1beta,magnetic_field,energy_density,magnetization_density)
+      PARAMETER maximal_side=100
+      INTEGER forward(maximal_side),backward(maximal_side)
+      COMMON /boundaries/ forward,backward
+      INTEGER side,random_seed,spin(maximal_side,maximal_side)
+      REAL magnetic_field,magnetization_density
+      INTEGER current_spin,sum_of_the_neighbours
+      INTEGER x_position,y_position
+
+      total_magnetization=0
+      total_energy=0
+      
+      DO 5 x_position=1,side
+        DO 6 y_position=1,side
+            current_spin=spin(x_position,y_position)
+            sum_of_the_neighbours=
+     1      spin(x_position,forward(y_position))+
+     2      spin(x_position,backward(y_position))+
+     3      spin(forward(x_position),y_position)+
+     4      spin(backward(x_position),y_position)
+            effective_force=sum_of_the_neighbours+magnetic_field
+            IF(EXP(-beta*effective_force*current_spin*2.)
+     1      .GT. RAND() ) THEN
+              new_spin = -current_spin
+            ELSE
+                new_spin=current_spin
+            END IF
+            spin(x_position,y_position)=new_spin
+            total_magnetization=total_magnetization+new_spin
+            total_energy = total_energy+
+     1      (.5*sum_of_the_neighbours+magnetic_field)*new_spin
+6       CONTINUE
+5     CONTINUE
+            
+      magnetization_density=total_magnetization/FLOAT(side**2)
+      energy_density=total_energy/FLOAT(side**2)
+      RETURN
+      END
+
+      SUBROUTINE read_input(side,number_of_iterations,beta,
+     1magnetic_field)
+      REAL magnetic_field
+      INTEGER side
+      PARAMETER maximal_side=100
+
+1     WRITE(6,*) &#39;Which is the length of the side ?
+     1     (Please less than&#39;,maximal_side,&#39;)&#39;
+      READ(5,*) side
+      IF(side .GT. maximal_side .OR. side .LT. 1) THEN 
+        WRITE(6,*) &#39;The value of side is not good&#39;
+        go to 1
+      ENDIF
+      WRITE(6,*) &#39;How many iterations?&#39;
+      READ(5,*) number_of_iterations
+      WRITE(6,*) &#39;Which is the value of beta?&#39;
+      READ(5,*) beta
+      WRITE(6,*) &#39;Which is the value of the magnetic field?&#39;
+      READ(5,*) magnetic_field
+      RETURN
+      END
+
+      SUBROUTINE get_random_seed(random_seed)
+      INTEGER random_seed
+      WRITE(6,*) &#39;Which is the random seed?&#39;
+      WRITE(6,*) &#39;Please insert a positive odd number of 7-8 digits&#39;
+      READ(5,*) random_seed
+      RETURN
+      END
+
+      SUBROUTINE write_output(iteration,energy_density,
+     1                         magnetization_density)
+      REAL magnetization_density
+
+      WRITE(6,*) &#39;Iteration=      &#39;,iteration
+      WRITE(6,*) &#39;Energy density =       &#39;,energy_density
+      WRITE(6,*) &#39;Magnetization density=      &#39;,magnetization_density
+      RETURN
+      END
+
+</code></pre><p>goto文やcontinue文、common文が使われています。<code>program main</code>というFortran90でお馴染みのものもありません。そして、実数が全て単精度になっています。<code>beta</code>が温度の逆数になっていまして、<span>$\beta_c = \tanh^{-1}(\sqrt(2) -1 ) = 0.44068679350977163$</span>が相転移温度です。この<span>$\beta_c$</span>より<code>beta</code>が小さければ高温側、大きければ低温側となり、1サイトあたりの磁化である<code>Magnetization density</code>の値は高温で0、低温1となります。</p><p>このコードをJuliaに移植してみます。以下がそのコードです。</p><pre><code class="language-julia">struct Boundaries
+    forward::Array{Int64,1}
+    backward::Array{Int64,1}
+    function Boundaries(side)
+        return new(zeros(Int64,side),zeros(Int64,side))
+    end
+end
+
+function compute_backward_and_forward(side)
+    boundaries = Boundaries(side)
+    forward = boundaries.forward
+    backward = boundaries.backward
+    for position=1:side
+        forward[position]=position % side +1
+        backward[position]=(position-2+side) % side+1
+    end
+    return boundaries
+end
+
+
+function set_spin_to_1!(spin,side)
+    spin[1:side,1:side] .= 1
+end
+
+
+function one_Monte_Carlo_cycle!(boundaries,spin,side,
+    beta,magnetic_field)
+    forward = boundaries.forward
+    backward = boundaries.backward
+
+    total_magnetization=0.0
+    total_energy=0.0
+
+    for x_position=1:side
+        for y_position=1:side
+            current_spin=spin[x_position,y_position]
+            sum_of_the_neighbours= 
+                spin[x_position,forward[y_position]] + 
+                spin[x_position,backward[y_position]]+
+                spin[forward[x_position],y_position]+
+                spin[backward[x_position],y_position]
+
+            effective_force=sum_of_the_neighbours+magnetic_field
+            if exp(-beta*effective_force*current_spin*2) &gt; rand()
+                new_spin = -current_spin
+            else
+                new_spin = current_spin
+            end
+            spin[x_position,y_position]=new_spin
+            total_magnetization=total_magnetization+new_spin
+            total_energy = total_energy+
+                (0.5*sum_of_the_neighbours+magnetic_field)*new_spin
+        end
+    end
+    magnetization_density=total_magnetization/(side^2)
+    energy_density=total_energy/(side^2)
+
+    return energy_density,magnetization_density
+end
+
+
+function read_input(;maximal_side=100)
+    side = 0
+    while true
+        println(&quot;Which is the length of the side ?      (Please less than &quot;,maximal_side,&quot;)&quot;)
+        side = parse(Int64,readline())
+        if side &gt; maximal_side || side &lt; 1
+            println(&quot;The value of side is not good&quot;)
+        else
+            break
+        end
+    end
+
+    println(&quot;How many iterations?&quot;)
+    number_of_iterations = parse(Int64,readline())
+    println(&quot;Which is the value of beta?&quot;)
+    beta = parse(Float64,readline())
+    println(&quot;Which is the value of the magnetic field?&quot;)
+    magnetic_field = parse(Float64,readline())
+    return side,number_of_iterations,beta,magnetic_field
+
+end
+
+function get_random_seed()
+    println(&quot;Which is the random seed?&quot;)
+    println(&quot;Please insert a positive odd number of 7-8 digits&quot;)
+    random_seed = parse(Int64,readline())
+    return random_seed
+end
+
+
+function write_output(iteration,energy_density,
+                             magnetization_density)
+    println(&quot;Iteration=     &quot;,iteration)
+    println(&quot;Energy density =       &quot;,energy_density)
+    println(&quot;Magnetization density=      &quot;,magnetization_density)
+    return
+end
+
+using Random
+
+function main()
+    side,number_of_iterations,beta,magnetic_field = read_input(maximal_side=100)
+    spin = zeros(Float64,side,side)
+    random_seed = get_random_seed()
+    Random.seed!(random_seed)
+    boundaries = compute_backward_and_forward(side)
+    set_spin_to_1!(spin,side)
+    for iteration=1:number_of_iterations
+        energy_density,magnetization_density = 
+                one_Monte_Carlo_cycle!(boundaries,spin,side,beta,magnetic_field)
+        write_output(iteration,energy_density,magnetization_density)
+    end
+end
+main()</code></pre><p>となります。</p><p>ポイントは、</p><ol><li>common文はstructで扱うようにした。これで不必要に引数が増えることがなくなり、どの関数がどの値を扱っているかがわかりやすくなった</li><li>現代では単精度でCPU上で計算する意味はもはやないので、全て倍精度実数とした</li><li>goto文での無限ループの部分は<code>while true</code>で回すようにした</li><li>キーボードからの入力には<code>readline()</code>を使った</li></ol><p>です。</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../chapter1/02/">« 線形代数計算</a><a class="docs-footer-nextpage" href="../02/">FortranでできることをJuliaでやってみる »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 31 August 2021 16:01">Tuesday 31 August 2021</span>. Using Julia version 1.6.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
